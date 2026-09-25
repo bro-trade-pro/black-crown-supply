@@ -8,7 +8,8 @@ type Product={id:string;nom:string;marque:string|null;contenance:string|null;pri
 async function getProducts(){
  const {data,error}=await supabase.from("products").select("id,nom,marque,contenance,prix_ttc_cents,image_url,category_id").eq("actif",true).order("nom");
 if (error) {
-  throw new Error("SUPABASE ERROR: " + JSON.stringify(error));
+  console.error("Erreur Supabase products:", error);
+  return [] as Product[];
 }
  return (data??[]) as Product[];
 }
