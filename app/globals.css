@@ -247,6 +247,9 @@ h1 em{
 
 .cardBody{
   padding:18px;
+  display:flex;
+  flex-direction:column;
+  height:210px;
 }
 
 .cardBody small{
@@ -279,7 +282,7 @@ h1 em{
 
 .productButton{
   width:100%;
-  margin-top:12px;
+  margin-top:auto;
   background:transparent;
   border:1px solid #665632;
   color:var(--gold);
