@@ -7,7 +7,9 @@ type Product={id:string;nom:string;marque:string|null;contenance:string|null;pri
 
 async function getProducts(){
  const {data,error}=await supabase.from("products").select("id,nom,marque,contenance,prix_ttc_cents,image_url,category_id").eq("actif",true).order("nom");
- if(error){console.error(error);return [] as Product[]}
+if (error) {
+  throw new Error("SUPABASE ERROR: " + JSON.stringify(error));
+}
  return (data??[]) as Product[];
 }
 function imageUrl(path:string|null){if(!path)return null;return supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl}
