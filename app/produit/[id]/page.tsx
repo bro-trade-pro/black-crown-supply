@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import ProductOrder from "./ProductOrder";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -186,114 +187,13 @@ export default async function ProductPage({
 
             <div className="productDivider" />
 
-            {/* VARIANTES */}
+            {/* COMMANDE */}
             {variants.length > 0 ? (
-              <div className="variantSection">
-
-                <p className="eyebrow">
-                  COMPOSEZ VOTRE COMMANDE
-                </p>
-
-                <h2>
-                  Choisissez vos{" "}
-                  {product.category_id === 1
-                    ? "couleurs"
-                    : "variantes"}
-                </h2>
-
-                <p className="variantCount">
-                  {variants.length}{" "}
-                  {product.category_id === 1
-                    ? "couleurs disponibles"
-                    : "variantes disponibles"}
-                </p>
-
-                <div className="variantGrid">
-
-                  {variants.map((variant) => (
-                    <div
-                      className="variantRow"
-                      key={variant.id}
-                    >
-                      <div className="variantIdentity">
-
-                        {variant.image_url && (
-                          <img
-                            src={imageUrl(
-                              variant.image_url
-                            ) ?? ""}
-                            alt={variant.nom}
-                          />
-                        )}
-
-                        <div>
-                          <strong>
-                            {variant.nom}
-                          </strong>
-
-                          {variant.reference &&
-                            variant.reference !==
-                              variant.nom && (
-                              <small>
-                                Réf.{" "}
-                                {variant.reference}
-                              </small>
-                            )}
-                        </div>
-                      </div>
-
-                      <div className="quantityControl">
-                        <button
-                          type="button"
-                          aria-label={`Retirer ${variant.nom}`}
-                        >
-                          −
-                        </button>
-
-                        <span>0</span>
-
-                        <button
-                          type="button"
-                          aria-label={`Ajouter ${variant.nom}`}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                </div>
-
-                <div className="orderSummary">
-                  <div>
-                    <small>
-                      VOTRE SÉLECTION
-                    </small>
-
-                    <strong>
-                      0 article
-                    </strong>
-                  </div>
-
-                  <div className="orderTotal">
-                    <small>
-                      TOTAL TTC
-                    </small>
-
-                    <strong>
-                      0,00 €
-                    </strong>
-                  </div>
-                </div>
-
-                <button
-                  className="addCartButton"
-                  type="button"
-                >
-                  Ajouter au panier
-                </button>
-
-              </div>
+              <ProductOrder
+                variants={variants}
+                priceCents={product.prix_ttc_cents}
+                categoryId={product.category_id}
+              />
             ) : (
               <div className="simpleProductOrder">
 
