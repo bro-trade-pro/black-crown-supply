@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Product={id:string;nom:string;marque:string|null;contenance:string|null;prix_ttc_cents:number;image_url:string|null;category_id:number};
 
 async function getProducts(){
