@@ -1,7 +1,6 @@
-
-import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,6 +13,7 @@ type Product = {
   contenance: string | null;
   prix_ttc_cents: number;
   image_url: string | null;
+  category_id: number;
 };
 
 type Variant = {
@@ -24,22 +24,30 @@ type Variant = {
   ordre: number;
 };
 
+function imageUrl(path: string | null) {
+  if (!path) return null;
+
+  return supabase.storage
+    .from("product-images")
+    .getPublicUrl(path).data.publicUrl;
+}
+
 async function getProduct(id: string) {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id,nom,marque,description,contenance,prix_ttc_cents,image_url"
+      "id,nom,marque,description,contenance,prix_ttc_cents,image_url,category_id"
     )
     .eq("id", id)
     .eq("actif", true)
-    .maybeSingle();
+    .single();
 
-  if (error) {
+  if (error || !data) {
     console.error("Erreur produit :", error);
     return null;
   }
 
-  return data as Product | null;
+  return data as Product;
 }
 
 async function getVariants(productId: string) {
@@ -48,7 +56,7 @@ async function getVariants(productId: string) {
     .select("id,nom,reference,image_url,ordre")
     .eq("product_id", productId)
     .eq("actif", true)
-    .order("ordre");
+    .order("ordre", { ascending: true });
 
   if (error) {
     console.error("Erreur variantes :", error);
@@ -56,14 +64,6 @@ async function getVariants(productId: string) {
   }
 
   return (data ?? []) as Variant[];
-}
-
-function imageUrl(path: string | null) {
-  if (!path) return null;
-
-  return supabase.storage
-    .from("product-images")
-    .getPublicUrl(path).data.publicUrl;
 }
 
 export default async function ProductPage({
@@ -82,142 +82,288 @@ export default async function ProductPage({
   const variants = await getVariants(product.id);
   const img = imageUrl(product.image_url);
 
+  const categoryLabel =
+    product.category_id === 1 ? "Mèches" : "Cosmétiques";
+
+  const categoryLink =
+    product.category_id === 1 ? "/#meches" : "/#cosmetiques";
+
   return (
     <main className="productPage">
 
-      <div className="productTopbar">
-        <Link href="/#meches" className="backLink">
-          ← Retour au catalogue
-        </Link>
+      {/* MENU LATÉRAL */}
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="crown">♛</div>
 
-        <span>BLACK CROWN SUPPLY</span>
-      </div>
-
-      <section className="productDetail">
-
-        <div className="productVisual">
-          {img ? (
-            <img src={img} alt={product.nom} />
-          ) : (
-            <div className="productPlaceholder">
-              BLACK CROWN
-            </div>
-          )}
+          <strong>BLACK CROWN</strong>
+          <span>SUPPLY</span>
+          <small>WHOLESALE PRO</small>
         </div>
 
-        <div className="productInfo">
+        <nav>
+          <Link href="/#accueil">Accueil</Link>
+          <Link href="/#meches">Mèches</Link>
+          <Link href="/#cosmetiques">Cosmétiques</Link>
+          <Link href="/#avantages">Nos avantages</Link>
+          <Link href="/#contact">Contact</Link>
+        </nav>
 
-          {product.marque && (
-            <p className="productBrand">
-              {product.marque}
-            </p>
-          )}
+        <div className="pro">
+          ESPACE PRO
+          <br />
+          <button>Connexion salon</button>
+        </div>
+      </aside>
 
-          <h1>{product.nom}</h1>
+      {/* CONTENU */}
+      <section className="content productContent">
 
-          {product.contenance && (
-            <p className="productSize">
-              {product.contenance}
-            </p>
-          )}
+        {/* BARRE SUPÉRIEURE */}
+        <header>
+          <span>BLACK CROWN SUPPLY</span>
+          <div>Catalogue professionnel · Prix TTC</div>
+        </header>
 
-          {product.description && (
-            <p className="productDescription">
-              {product.description}
-            </p>
-          )}
+        {/* RETOUR */}
+        <div className="productBack">
+          <Link href={categoryLink}>
+            ← Retour au catalogue
+          </Link>
 
-          <div className="productPrice">
-            {(product.prix_ttc_cents / 100)
-              .toFixed(2)
-              .replace(".", ",")}{" "}
-            €
-            <span>TTC</span>
+          <span>{categoryLabel}</span>
+        </div>
+
+        {/* PRODUIT */}
+        <section className="productHero">
+
+          {/* IMAGE */}
+          <div className="productVisual">
+            {img ? (
+              <img
+                src={img}
+                alt={product.nom}
+              />
+            ) : (
+              <div className="productPlaceholder">
+                BLACK CROWN
+              </div>
+            )}
           </div>
 
-          <div className="productDivider" />
+          {/* INFORMATIONS */}
+          <div className="productInfo">
 
-          {variants.length > 0 ? (
-            <>
-              <div className="variantHeader">
-                <div>
-                  <p className="variantEyebrow">
-                    COMPOSEZ VOTRE COMMANDE
-                  </p>
+            {product.marque && (
+              <p className="productBrand">
+                {product.marque}
+              </p>
+            )}
 
-                  <h2>
-                    Choisissez vos couleurs
-                  </h2>
+            <h1 className="productTitle">
+              {product.nom}
+            </h1>
+
+            {product.contenance && (
+              <p className="productSize">
+                {product.contenance}
+              </p>
+            )}
+
+            {product.description && (
+              <p className="productDescription">
+                {product.description}
+              </p>
+            )}
+
+            <div className="productPrice">
+              {(product.prix_ttc_cents / 100)
+                .toFixed(2)
+                .replace(".", ",")}{" "}
+              €
+              <span>TTC</span>
+            </div>
+
+            <div className="productDivider" />
+
+            {/* VARIANTES */}
+            {variants.length > 0 ? (
+              <div className="variantSection">
+
+                <p className="eyebrow">
+                  COMPOSEZ VOTRE COMMANDE
+                </p>
+
+                <h2>
+                  Choisissez vos{" "}
+                  {product.category_id === 1
+                    ? "couleurs"
+                    : "variantes"}
+                </h2>
+
+                <p className="variantCount">
+                  {variants.length}{" "}
+                  {product.category_id === 1
+                    ? "couleurs disponibles"
+                    : "variantes disponibles"}
+                </p>
+
+                <div className="variantGrid">
+
+                  {variants.map((variant) => (
+                    <div
+                      className="variantRow"
+                      key={variant.id}
+                    >
+                      <div className="variantIdentity">
+
+                        {variant.image_url && (
+                          <img
+                            src={imageUrl(
+                              variant.image_url
+                            ) ?? ""}
+                            alt={variant.nom}
+                          />
+                        )}
+
+                        <div>
+                          <strong>
+                            {variant.nom}
+                          </strong>
+
+                          {variant.reference &&
+                            variant.reference !==
+                              variant.nom && (
+                              <small>
+                                Réf.{" "}
+                                {variant.reference}
+                              </small>
+                            )}
+                        </div>
+                      </div>
+
+                      <div className="quantityControl">
+                        <button
+                          type="button"
+                          aria-label={`Retirer ${variant.nom}`}
+                        >
+                          −
+                        </button>
+
+                        <span>0</span>
+
+                        <button
+                          type="button"
+                          aria-label={`Ajouter ${variant.nom}`}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
                 </div>
 
-                <span>
-                  {variants.length} couleurs disponibles
-                </span>
-              </div>
+                <div className="orderSummary">
+                  <div>
+                    <small>
+                      VOTRE SÉLECTION
+                    </small>
 
-              <div className="variantList">
-                {variants.map((variant) => (
-                  <div
-                    className="variantRow"
-                    key={variant.id}
-                  >
-                    <div className="variantName">
-                      <strong>{variant.nom}</strong>
-
-                      {variant.reference &&
-                        variant.reference !== variant.nom && (
-                          <small>
-                            Réf. {variant.reference}
-                          </small>
-                        )}
-                    </div>
-
-                    <div className="quantityControl">
-                      <button type="button">−</button>
-                      <span>0</span>
-                      <button type="button">+</button>
-                    </div>
+                    <strong>
+                      0 article
+                    </strong>
                   </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="variantEyebrow">
-                QUANTITÉ
-              </p>
 
-              <div className="singleQuantity">
-                <div className="quantityControl">
+                  <div className="orderTotal">
+                    <small>
+                      TOTAL TTC
+                    </small>
+
+                    <strong>
+                      0,00 €
+                    </strong>
+                  </div>
+                </div>
+
+                <button
+                  className="addCartButton"
+                  type="button"
+                >
+                  Ajouter au panier
+                </button>
+
+              </div>
+            ) : (
+              <div className="simpleProductOrder">
+
+                <p className="eyebrow">
+                  COMMANDE PROFESSIONNELLE
+                </p>
+
+                <h2>Quantité</h2>
+
+                <div className="simpleQuantity">
                   <button type="button">−</button>
                   <span>0</span>
                   <button type="button">+</button>
                 </div>
+
+                <button
+                  className="addCartButton"
+                  type="button"
+                >
+                  Ajouter au panier
+                </button>
+
               </div>
-            </>
-          )}
+            )}
 
-          <div className="productOrderSummary">
-            <div>
-              <small>TOTAL</small>
-              <strong>0 article</strong>
-            </div>
+          </div>
+        </section>
 
-            <div className="summaryPrice">
-              0,00 €
-              <span>TTC</span>
-            </div>
+        {/* RÉASSURANCE */}
+        <section className="productBenefits">
+
+          <div>
+            <span>01</span>
+            <strong>Tarifs professionnels</strong>
+            <p>
+              Une offre dédiée aux salons et
+              professionnels de la coiffure.
+            </p>
           </div>
 
-          <button
-            className="addToCart"
-            type="button"
-            disabled
-          >
-            Ajouter au panier
-          </button>
+          <div>
+            <span>02</span>
+            <strong>Livraison directe</strong>
+            <p>
+              Une commande simple et une relation
+              terrain avec Black Crown Supply.
+            </p>
+          </div>
 
-        </div>
+          <div>
+            <span>03</span>
+            <strong>Besoin d'une référence ?</strong>
+            <p>
+              Demandez-nous les produits que vous
+              souhaitez retrouver au catalogue.
+            </p>
+          </div>
+
+        </section>
+
+        {/* FOOTER */}
+        <footer>
+          <strong>BLACK CROWN SUPPLY</strong>
+
+          <span>
+            Une marque Bro Trade Pro ·
+            Évry-Courcouronnes
+          </span>
+        </footer>
+
       </section>
     </main>
   );
