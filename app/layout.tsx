@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { CartProvider } from "./CartContext";
+import Sidebar from "@/components/Sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
-        <CartProvider>{children}</CartProvider>
+        <div className="siteLayout">
+          <Sidebar />
+          <div className="siteMain">
+            {children}
+          </div>
+        </div>
       </body>
     </html>
   );
