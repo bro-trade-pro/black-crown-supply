@@ -1045,3 +1045,52 @@ footer strong {
     margin-top: 20px;
   }
 }
+
+/* Structure commune à toutes les pages */
+.siteLayout {
+  min-height: 100vh;
+}
+
+.siteMain {
+  min-width: 0;
+  margin-left: 225px;
+}
+
+.siteMain > .content,
+.siteMain > main.content {
+  margin-left: 0;
+  width: 100%;
+  max-width: none;
+}
+
+.sidebar .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: inherit;
+}
+
+.sidebarAuthButton {
+  display: block;
+  margin-top: 12px;
+  padding: 12px 8px;
+  border: 1px solid #c8a75b;
+  color: #c8a75b;
+  text-align: center;
+  text-decoration: none;
+}
+
+.sidebarSignupLink {
+  display: block;
+  margin-top: 14px;
+  color: #c8a75b;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .siteMain {
+    margin-left: 0;
+  }
+}
