@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -73,7 +74,6 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
   const product = await getProduct(id);
 
   if (!product) {
@@ -84,19 +84,21 @@ export default async function ProductPage({
   const img = imageUrl(product.image_url);
 
   const categoryLabel =
-    product.category_id === 1 ? "Mèches" : "Cosmétiques";
+    product.category_id === 1
+      ? "Mèches"
+      : "Cosmétiques";
 
   const categoryLink =
-    product.category_id === 1 ? "/#meches" : "/#cosmetiques";
+    product.category_id === 1
+      ? "/#meches"
+      : "/#cosmetiques";
 
   return (
     <main className="productPage">
-
       {/* MENU LATÉRAL */}
       <aside className="sidebar">
         <div className="brand">
           <div className="crown">♛</div>
-
           <strong>BLACK CROWN</strong>
           <span>SUPPLY</span>
           <small>WHOLESALE PRO</small>
@@ -105,9 +107,20 @@ export default async function ProductPage({
         <nav>
           <Link href="/#accueil">Accueil</Link>
           <Link href="/#meches">Mèches</Link>
-          <Link href="/#cosmetiques">Cosmétiques</Link>
-          <Link href="/#avantages">Nos avantages</Link>
+          <Link href="/#cosmetiques">
+            Cosmétiques
+          </Link>
+          <Link href="/#avantages">
+            Nos avantages
+          </Link>
           <Link href="/#contact">Contact</Link>
+
+          <Link
+            href="/panier"
+            style={{ color: "#c8a75b" }}
+          >
+            Mon panier →
+          </Link>
         </nav>
 
         <div className="pro">
@@ -119,14 +132,13 @@ export default async function ProductPage({
 
       {/* CONTENU */}
       <section className="content productContent">
-
-        {/* BARRE SUPÉRIEURE */}
         <header>
           <span>BLACK CROWN SUPPLY</span>
-          <div>Catalogue professionnel · Prix TTC</div>
+          <div>
+            Catalogue professionnel · Prix TTC
+          </div>
         </header>
 
-        {/* RETOUR */}
         <div className="productBack">
           <Link href={categoryLink}>
             ← Retour au catalogue
@@ -137,14 +149,9 @@ export default async function ProductPage({
 
         {/* PRODUIT */}
         <section className="productHero">
-
-          {/* IMAGE */}
           <div className="productVisual">
             {img ? (
-              <img
-                src={img}
-                alt={product.nom}
-              />
+              <img src={img} alt={product.nom} />
             ) : (
               <div className="productPlaceholder">
                 BLACK CROWN
@@ -152,9 +159,7 @@ export default async function ProductPage({
             )}
           </div>
 
-          {/* INFORMATIONS */}
           <div className="productInfo">
-
             {product.marque && (
               <p className="productBrand">
                 {product.marque}
@@ -187,47 +192,28 @@ export default async function ProductPage({
 
             <div className="productDivider" />
 
-            {/* COMMANDE */}
-            {variants.length > 0 ? (
-              <ProductOrder
-                variants={variants}
-                priceCents={product.prix_ttc_cents}
-                categoryId={product.category_id}
-              />
-            ) : (
-              <div className="simpleProductOrder">
-
-                <p className="eyebrow">
-                  COMMANDE PROFESSIONNELLE
-                </p>
-
-                <h2>Quantité</h2>
-
-                <div className="simpleQuantity">
-                  <button type="button">−</button>
-                  <span>0</span>
-                  <button type="button">+</button>
-                </div>
-
-                <button
-                  className="addCartButton"
-                  type="button"
-                >
-                  Ajouter au panier
-                </button>
-
-              </div>
-            )}
-
+            <ProductOrder
+              productId={product.id}
+              productName={product.nom}
+              productImageUrl={img}
+              variants={variants}
+              priceCents={
+                product.prix_ttc_cents
+              }
+              categoryId={
+                product.category_id
+              }
+            />
           </div>
         </section>
 
-        {/* RÉASSURANCE */}
+        {/* AVANTAGES */}
         <section className="productBenefits">
-
           <div>
             <span>01</span>
-            <strong>Tarifs professionnels</strong>
+            <strong>
+              Tarifs professionnels
+            </strong>
             <p>
               Une offre dédiée aux salons et
               professionnels de la coiffure.
@@ -238,32 +224,34 @@ export default async function ProductPage({
             <span>02</span>
             <strong>Livraison directe</strong>
             <p>
-              Une commande simple et une relation
-              terrain avec Black Crown Supply.
+              Une commande simple et une
+              relation terrain avec
+              Black Crown Supply.
             </p>
           </div>
 
           <div>
             <span>03</span>
-            <strong>Besoin d'une référence ?</strong>
+            <strong>
+              Besoin d'une référence ?
+            </strong>
             <p>
-              Demandez-nous les produits que vous
-              souhaitez retrouver au catalogue.
+              Demandez-nous les produits que
+              vous souhaitez retrouver au
+              catalogue.
             </p>
           </div>
-
         </section>
 
-        {/* FOOTER */}
         <footer>
-          <strong>BLACK CROWN SUPPLY</strong>
-
+          <strong>
+            BLACK CROWN SUPPLY
+          </strong>
           <span>
             Une marque Bro Trade Pro ·
             Évry-Courcouronnes
           </span>
         </footer>
-
       </section>
     </main>
   );
