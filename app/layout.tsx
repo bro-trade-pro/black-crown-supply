@@ -1,6 +1,7 @@
 
 import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar";
+import WelcomeBanner from "@/components/WelcomeBanner";
 import { CartProvider } from "@/app/CartContext";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
             <Sidebar />
 
             <div className="siteMain">
+              <WelcomeBanner />
               {children}
             </div>
           </div>
