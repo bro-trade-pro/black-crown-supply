@@ -25,39 +25,6 @@ export default function CartPage() {
 
   return (
     <main className="productPage">
-      {/* MENU LATÉRAL */}
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="crown">♛</div>
-          <strong>BLACK CROWN</strong>
-          <span>SUPPLY</span>
-          <small>WHOLESALE PRO</small>
-        </div>
-
-        <nav>
-          <Link href="/#accueil">Accueil</Link>
-          <Link href="/#meches">Mèches</Link>
-          <Link href="/#cosmetiques">
-            Cosmétiques
-          </Link>
-          <Link href="/#avantages">
-            Nos avantages
-          </Link>
-          <Link href="/#contact">Contact</Link>
-          <Link href="/panier" style={{ color: gold }}>
-            Mon panier
-          </Link>
-        </nav>
-
-        <div className="pro">
-          ESPACE PRO
-          <br />
-          <button type="button">
-            Connexion salon
-          </button>
-        </div>
-      </aside>
-
       {/* CONTENU */}
       <section className="content productContent">
         <header>
