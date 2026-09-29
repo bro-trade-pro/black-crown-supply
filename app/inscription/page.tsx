@@ -88,11 +88,14 @@ export default function InscriptionPage() {
 
       setSuccess(true);
     } catch (err) {
-      console.error("Erreur inscription :", err);
-      setError(
-        "L'inscription n'a pas abouti. Vérifie tes informations ou contacte-nous."
-      );
-    } finally {
+  console.error("Erreur inscription :", err);
+
+  setError(
+    err instanceof Error
+      ? `Erreur Supabase : ${err.message}`
+      : "Une erreur inattendue est survenue. Contactez-nous."
+  );
+} finally {
       setLoading(false);
     }
   }
