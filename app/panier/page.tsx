@@ -7,6 +7,8 @@ import { useCart } from "../CartContext";
 const gold = "#c8a75b";
 const cream = "#f4efe4";
 const border = "#30291c";
+const FRANCO_TTC = 60000;
+const LIVRAISON_TTC = 1440;
 
 function money(cents: number) {
   return (cents / 100).toFixed(2).replace(".", ",") + " €";
@@ -22,6 +24,17 @@ export default function CartPage() {
     totalQuantity,
     totalCents,
   } = useCart();
+
+  // Hypothèse actuelle : TVA de 20 % sur tous les produits.
+  const totalHT = totalCents / 1.2;
+  const francoAtteint = totalCents >= FRANCO_TTC;
+  const resteTTC = Math.max(0, FRANCO_TTC - totalCents);
+  const progression = Math.min(
+    100,
+    (totalCents / FRANCO_TTC) * 100
+  );
+  const livraison = francoAtteint ? 0 : LIVRAISON_TTC;
+  const totalCommande = totalCents + livraison;
 
   return (
     <main className="productPage">
@@ -55,7 +68,7 @@ export default function CartPage() {
 
           <h1
             style={{
-              fontSize: "clamp(38px, 5vw, 65px)",
+              fontSize: "clamp(38px,5vw,65px)",
               margin: "10px 0 15px",
             }}
           >
@@ -69,8 +82,8 @@ export default function CartPage() {
               marginBottom: 38,
             }}
           >
-            Vérifiez vos références et vos quantités avant de
-            passer commande.
+            Vérifiez vos références et vos quantités
+            avant de passer commande.
           </p>
 
           {!ready ? (
@@ -98,7 +111,7 @@ export default function CartPage() {
 
               <h2
                 style={{
-                  fontFamily: "Georgia, serif",
+                  fontFamily: "Georgia,serif",
                   fontWeight: 400,
                   fontSize: 30,
                 }}
@@ -107,7 +120,8 @@ export default function CartPage() {
               </h2>
 
               <p style={{ color: "#999" }}>
-                Retrouvez toutes nos références dans le catalogue.
+                Retrouvez toutes nos références
+                dans le catalogue.
               </p>
 
               <Link
@@ -167,7 +181,10 @@ export default function CartPage() {
                         />
                       ) : (
                         <span
-                          style={{ color: "#111", fontSize: 10 }}
+                          style={{
+                            color: "#111",
+                            fontSize: 10,
+                          }}
                         >
                           BLACK CROWN
                         </span>
@@ -185,7 +202,7 @@ export default function CartPage() {
                         style={{
                           color: cream,
                           textDecoration: "none",
-                          fontFamily: "Georgia, serif",
+                          fontFamily: "Georgia,serif",
                           fontSize: 19,
                           lineHeight: 1.4,
                         }}
@@ -212,12 +229,15 @@ export default function CartPage() {
                           fontSize: 12,
                         }}
                       >
-                        Prix unitaire : {money(item.priceCents)} TTC
+                        Prix unitaire :{" "}
+                        {money(item.priceCents)} TTC
                       </p>
 
                       <button
                         type="button"
-                        onClick={() => removeItem(item.key)}
+                        onClick={() =>
+                          removeItem(item.key)
+                        }
                         style={{
                           border: 0,
                           padding: 0,
@@ -241,7 +261,10 @@ export default function CartPage() {
                         type="button"
                         aria-label={`Diminuer ${item.productName}`}
                         onClick={() =>
-                          updateQuantity(item.key, item.quantity - 1)
+                          updateQuantity(
+                            item.key,
+                            item.quantity - 1
+                          )
                         }
                       >
                         −
@@ -253,7 +276,10 @@ export default function CartPage() {
                         type="button"
                         aria-label={`Augmenter ${item.productName}`}
                         onClick={() =>
-                          updateQuantity(item.key, item.quantity + 1)
+                          updateQuantity(
+                            item.key,
+                            item.quantity + 1
+                          )
                         }
                       >
                         +
@@ -280,12 +306,14 @@ export default function CartPage() {
                       <strong
                         style={{
                           color: gold,
-                          fontFamily: "Georgia, serif",
+                          fontFamily: "Georgia,serif",
                           fontSize: 23,
                           fontWeight: 400,
                         }}
                       >
-                        {money(item.priceCents * item.quantity)}
+                        {money(
+                          item.priceCents * item.quantity
+                        )}
                       </strong>
                     </div>
                   </article>
@@ -307,7 +335,7 @@ export default function CartPage() {
 
                 <h2
                   style={{
-                    fontFamily: "Georgia, serif",
+                    fontFamily: "Georgia,serif",
                     fontWeight: 400,
                     fontSize: 29,
                     marginBottom: 30,
@@ -316,25 +344,125 @@ export default function CartPage() {
                   Votre commande
                 </h2>
 
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 20,
-                    marginBottom: 18,
-                    color: "#bbb",
-                    fontSize: 14,
-                  }}
-                >
+                <div style={ligne}>
                   <span>Nombre d'articles</span>
                   <strong>{totalQuantity}</strong>
+                </div>
+
+                <div style={ligne}>
+                  <span>Total produits HT</span>
+                  <strong>
+                    {money(Math.round(totalHT))}
+                  </strong>
+                </div>
+
+                <div style={ligne}>
+                  <span>Total produits TTC</span>
+                  <strong>{money(totalCents)}</strong>
+                </div>
+
+                <div
+                  style={{
+                    margin: "26px 0",
+                    padding: 20,
+                    border: `1px solid ${border}`,
+                    background: "#19160f",
+                  }}
+                >
+                  {francoAtteint ? (
+                    <p
+                      style={{
+                        color: "#8ed3a2",
+                        fontWeight: 700,
+                        marginTop: 0,
+                      }}
+                    >
+                      ✓ Livraison offerte !
+                    </p>
+                  ) : (
+                    <p
+                      style={{
+                        color: gold,
+                        fontWeight: 700,
+                        lineHeight: 1.6,
+                        marginTop: 0,
+                      }}
+                    >
+                      Plus que {money(resteTTC)} TTC
+                      pour la livraison offerte !
+                    </p>
+                  )}
+
+                  <div
+                    style={{
+                      height: 10,
+                      background: "#383126",
+                      borderRadius: 20,
+                      overflow: "hidden",
+                      margin: "18px 0 10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${progression}%`,
+                        height: "100%",
+                        background: francoAtteint
+                          ? "#8ed3a2"
+                          : gold,
+                        borderRadius: 20,
+                        transition: "width 0.2s",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      color: "#aaa",
+                      fontSize: 12,
+                    }}
+                  >
+                    <span>
+                      {money(Math.round(totalHT))} HT
+                    </span>
+                    <span>500 € HT</span>
+                  </div>
+
+                  <p
+                    style={{
+                      color: "#aaa",
+                      fontSize: 12,
+                      lineHeight: 1.7,
+                      marginBottom: 0,
+                    }}
+                  >
+                    Franco de port : 500 € HT,
+                    soit 600 € TTC.
+                  </p>
+                </div>
+
+                <div style={ligne}>
+                  <span>Livraison</span>
+                  <strong
+                    style={{
+                      color: francoAtteint
+                        ? "#8ed3a2"
+                        : cream,
+                    }}
+                  >
+                    {francoAtteint
+                      ? "OFFERTE"
+                      : "14,40 € TTC"}
+                  </strong>
                 </div>
 
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    gap: 20,
+                    gap: 15,
                     padding: "24px 0",
                     borderTop: `1px solid ${border}`,
                     color: cream,
@@ -344,26 +472,14 @@ export default function CartPage() {
                   <strong
                     style={{
                       color: gold,
-                      fontFamily: "Georgia, serif",
+                      fontFamily: "Georgia,serif",
                       fontSize: 30,
                       fontWeight: 400,
                     }}
                   >
-                    {money(totalCents)}
+                    {money(totalCommande)}
                   </strong>
                 </div>
-
-                <p
-                  style={{
-                    color: "#999",
-                    fontSize: 12,
-                    lineHeight: 1.7,
-                  }}
-                >
-                  Hors éventuels frais de livraison.
-                  Le montant définitif sera confirmé lors de
-                  la validation.
-                </p>
 
                 <div
                   style={{
@@ -375,11 +491,15 @@ export default function CartPage() {
                     lineHeight: 1.8,
                   }}
                 >
-                  Acompte prévu à la commande :{" "}
-                  <strong style={{ color: gold }}>50 %</strong>
+                  Acompte à la commande :{" "}
+                  <strong style={{ color: gold }}>
+                    {money(Math.ceil(totalCommande / 2))}
+                  </strong>
                   <br />
-                  Solde prévu à la livraison :{" "}
-                  <strong style={{ color: gold }}>50 %</strong>
+                  Solde à la livraison :{" "}
+                  <strong style={{ color: gold }}>
+                    {money(Math.floor(totalCommande / 2))}
+                  </strong>
                 </div>
 
                 <Link
@@ -432,3 +552,12 @@ export default function CartPage() {
     </main>
   );
 }
+
+const ligne = {
+  display: "flex",
+  justifyContent: "space-between" as const,
+  gap: 20,
+  marginBottom: 18,
+  color: "#bbb",
+  fontSize: 14,
+};
