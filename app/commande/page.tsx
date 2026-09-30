@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import { useCart } from "../CartContext";
 import { supabase } from "@/lib/supabase";
 
+const gold = "#c8a75b";
+const cream = "#f4efe4";
+const border = "#40351f";
+
 type Salon = {
   nom_salon: string;
   adresse: string;
@@ -15,214 +19,26 @@ type Salon = {
   email: string;
 };
 
+type CommandeCreee = {
+  orderId: string;
+  numero: string;
+  produitsTtcCents: number;
+  livraisonTtcCents: number;
+  totalTtcCents: number;
+  acompteCents: number;
+  soldeCents: number;
+  nombreArticles: number;
+};
+
 function euros(cents: number) {
   return (cents / 100).toFixed(2).replace(".", ",") + " €";
-}
-
-export default function CommandePage() {
-  const { items, ready, totalQuantity, totalCents } = useCart();
-  const [salon, setSalon] = useState<Salon | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [demande, setDemande] = useState("");
-  const [commentaire, setCommentaire] = useState("");
-
-  useEffect(() => {
-    async function chargerSalon() {
-      const { data: auth } = await supabase.auth.getUser();
-
-      if (!auth.user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: profil } = await supabase
-        .from("profiles")
-        .select("salon_id")
-        .eq("id", auth.user.id)
-        .single();
-
-      if (profil?.salon_id) {
-        const { data } = await supabase
-          .from("salons")
-          .select(
-            "nom_salon,adresse,code_postal,ville,telephone,email"
-          )
-          .eq("id", profil.salon_id)
-          .single();
-
-        setSalon(data);
-      }
-
-      setLoading(false);
-    }
-
-    chargerSalon();
-  }, []);
-
-  return (
-    <main className="productPage">
-      <section className="content productContent">
-        <div
-          style={{
-            maxWidth: 1050,
-            margin: "0 auto",
-            padding: "55px 25px 100px",
-          }}
-        >
-          <Link href="/panier" style={{ color: "#c8a75b" }}>
-            ← Retour au panier
-          </Link>
-
-          <p className="eyebrow" style={{ marginTop: 45 }}>
-            BLACK CROWN SUPPLY
-          </p>
-
-          <h1 style={{ fontSize: "clamp(35px,5vw,58px)" }}>
-            Finaliser ma commande
-          </h1>
-
-          {!ready || loading ? (
-            <p>Chargement...</p>
-          ) : !salon ? (
-            <section style={bloc}>
-              <h2>Connectez-vous pour commander</h2>
-              <p>
-                Retrouvez votre compte professionnel pour
-                finaliser vos achats.
-              </p>
-              <Link href="/connexion" style={{ color: "#c8a75b" }}>
-                Connexion salon →
-              </Link>
-            </section>
-          ) : items.length === 0 ? (
-            <section style={bloc}>
-              <h2>Votre panier est vide</h2>
-              <Link href="/" style={{ color: "#c8a75b" }}>
-                Retour au catalogue →
-              </Link>
-            </section>
-          ) : (
-            <>
-              <section style={bloc}>
-                <p className="eyebrow">01 — LIVRAISON</p>
-                <h2>Votre salon</h2>
-                <p><strong>{salon.nom_salon}</strong></p>
-                <p>{salon.adresse}</p>
-                <p>{salon.code_postal} {salon.ville}</p>
-                <p>{salon.telephone}</p>
-                <p>{salon.email}</p>
-                <small style={{ color: "#aaa" }}>
-                  Ces coordonnées proviennent de votre compte pro.
-                </small>
-              </section>
-
-              <section style={bloc}>
-                <p className="eyebrow">02 — VOTRE SÉLECTION</p>
-                <h2>Récapitulatif</h2>
-
-                {items.map((item) => (
-                  <div
-                    key={item.key}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 20,
-                      borderBottom: "1px solid #40351f",
-                      padding: "16px 0",
-                    }}
-                  >
-                    <div>
-                      <strong>{item.productName}</strong>
-                      {item.variantName && (
-                        <p style={{ color: "#c8a75b" }}>
-                          {item.variantName}
-                        </p>
-                      )}
-                      <small>Quantité : {item.quantity}</small>
-                    </div>
-                    <strong>
-                      {euros(item.priceCents * item.quantity)}
-                    </strong>
-                  </div>
-                ))}
-
-                <p>{totalQuantity} articles</p>
-                <h2 style={{ color: "#c8a75b" }}>
-                  Total produits : {euros(totalCents)}
-                </h2>
-                <small>
-                  Hors frais de livraison éventuels.
-                </small>
-              </section>
-
-              <section style={bloc}>
-                <p className="eyebrow">03 — VOS DEMANDES</p>
-                <h2>Un besoin particulier ?</h2>
-
-                <label htmlFor="demande-produit">
-                  Un produit manque à notre catalogue ?
-                </label>
-                <textarea
-                  id="demande-produit"
-                  value={demande}
-                  onChange={(e) => setDemande(e.target.value)}
-                  placeholder="Marque, référence, quantité souhaitée..."
-                  style={champ}
-                />
-
-                <label htmlFor="commentaire">
-                  Commentaire sur votre commande
-                </label>
-                <textarea
-                  id="commentaire"
-                  value={commentaire}
-                  onChange={(e) => setCommentaire(e.target.value)}
-                  placeholder="Précisions pour votre livraison..."
-                  style={champ}
-                />
-              </section>
-
-              <section style={bloc}>
-                <p className="eyebrow">04 — VALIDATION</p>
-                <h2>Votre commande</h2>
-                <p>Total produits : {euros(totalCents)}</p>
-                <p>
-                  Acompte prévu : 50 % à la commande.
-                  Solde : 50 % à la livraison.
-                </p>
-
-                <button
-                  type="button"
-                  disabled
-                  style={{
-                    ...champ,
-                    background: "#554a31",
-                    color: "#ddd",
-                    cursor: "not-allowed",
-                    textAlign: "center",
-                  }}
-                >
-                  CONFIRMER MA COMMANDE — PROCHAINE ÉTAPE
-                </button>
-
-                <small style={{ color: "#aaa" }}>
-                  Aucun paiement ni aucune commande
-                  ne sont encore déclenchés.
-                </small>
-              </section>
-            </>
-          )}
-        </div>
-      </section>
-    </main>
-  );
 }
 
 const bloc = {
   marginTop: 30,
   padding: 30,
   background: "#171512",
-  border: "1px solid #40351f",
+  border: `1px solid ${border}`,
 };
 
 const champ = {
@@ -231,7 +47,623 @@ const champ = {
   margin: "12px 0 25px",
   padding: 15,
   background: "#111",
-  color: "#f4efe4",
+  color: cream,
   border: "1px solid #4b4029",
   fontSize: 14,
 };
+
+export default function CommandePage() {
+  const {
+    items,
+    ready,
+    totalQuantity,
+    totalCents,
+    clearCart,
+  } = useCart();
+
+  const [salon, setSalon] = useState<Salon | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [demande, setDemande] = useState("");
+  const [commentaire, setCommentaire] = useState("");
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState("");
+  const [commande, setCommande] =
+    useState<CommandeCreee | null>(null);
+
+  // Tarifs : 12 € HT sous 500 € HT de produits.
+  // Hypothèse : TVA de 20 % sur tous les produits.
+  const francoAtteint = totalCents >= 60000;
+  const livraisonCents = francoAtteint ? 0 : 1440;
+  const totalAvecLivraison = totalCents + livraisonCents;
+  const acompteCents = Math.ceil(totalAvecLivraison / 2);
+  const soldeCents = totalAvecLivraison - acompteCents;
+  const resteFrancoCents = Math.max(0, 60000 - totalCents);
+
+  useEffect(() => {
+    async function chargerSalon() {
+      try {
+        const { data: auth, error: authError } =
+          await supabase.auth.getUser();
+
+        if (authError) throw authError;
+
+        if (!auth.user) {
+          setLoading(false);
+          return;
+        }
+
+        const { data: profil, error: profilError } =
+          await supabase
+            .from("profiles")
+            .select("salon_id")
+            .eq("id", auth.user.id)
+            .single();
+
+        if (profilError) throw profilError;
+
+        if (profil?.salon_id) {
+          const { data, error: salonError } =
+            await supabase
+              .from("salons")
+              .select(
+                "nom_salon,adresse,code_postal,ville,telephone,email"
+              )
+              .eq("id", profil.salon_id)
+              .single();
+
+          if (salonError) throw salonError;
+
+          setSalon(data);
+        }
+      } catch (error) {
+        console.error("Chargement du salon :", error);
+        setErreur(
+          "Impossible de charger votre salon. " +
+          "Actualisez la page ou reconnectez-vous."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    chargerSalon();
+  }, []);
+
+  async function confirmerCommande() {
+    if (envoi || commande || !ready || !salon) return;
+
+    if (items.length === 0) {
+      setErreur("Votre panier est vide.");
+      return;
+    }
+
+    setEnvoi(true);
+    setErreur("");
+
+    try {
+      // Le serveur récupère lui-même les vrais prix.
+      // On ne transmet aucun prix calculé par le navigateur.
+      const articles = items.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+      }));
+
+      const { data, error } = await supabase.rpc(
+        "passer_commande",
+        {
+          p_articles: articles,
+          p_commentaire: commentaire.trim() || null,
+          p_demande: demande.trim() || null,
+        }
+      );
+
+      if (error) throw error;
+
+      if (
+        !data ||
+        typeof data !== "object" ||
+        typeof data.orderId !== "string" ||
+        typeof data.numero !== "string"
+      ) {
+        throw new Error(
+          "La réponse du serveur est incomplète. " +
+          "Vérifiez vos commandes avant de réessayer."
+        );
+      }
+
+      const resultat = data as CommandeCreee;
+
+      // Le panier n'est vidé qu'après confirmation
+      // de l'enregistrement par Supabase.
+      setCommande(resultat);
+      clearCart();
+    } catch (error) {
+      console.error("Commande :", error);
+
+      setErreur(
+        error instanceof Error
+          ? error.message
+          : "Impossible d'enregistrer votre commande."
+      );
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <main className="productPage">
+      <section className="content productContent">
+        <header>
+          <span>BLACK CROWN SUPPLY</span>
+          <div>Catalogue professionnel · Prix TTC</div>
+        </header>
+
+        <div
+          style={{
+            maxWidth: 1050,
+            margin: "0 auto",
+            padding: "55px 25px 100px",
+          }}
+        >
+          {commande ? (
+            <section
+              style={{
+                ...bloc,
+                textAlign: "center",
+                padding: "65px 30px",
+              }}
+            >
+              <div
+                style={{
+                  color: gold,
+                  fontSize: 55,
+                  marginBottom: 15,
+                }}
+              >
+                ♛
+              </div>
+
+              <p className="eyebrow">
+                COMMANDE ENREGISTRÉE
+              </p>
+
+              <h1
+                style={{
+                  fontSize: "clamp(32px,5vw,52px)",
+                  margin: "15px 0",
+                }}
+              >
+                Merci pour votre commande !
+              </h1>
+
+              <p style={{ color: "#bbb", fontSize: 15 }}>
+                Votre commande a bien été enregistrée.
+                Votre panier est maintenant vide.
+              </p>
+
+              <div
+                style={{
+                  maxWidth: 440,
+                  margin: "35px auto",
+                  padding: 25,
+                  background: "#100f0d",
+                  border: `1px solid ${border}`,
+                  textAlign: "left",
+                }}
+              >
+                <p style={{ color: "#999", fontSize: 12 }}>
+                  NUMÉRO DE COMMANDE
+                </p>
+
+                <h2
+                  style={{
+                    color: gold,
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {commande.numero}
+                </h2>
+
+                <p>
+                  Articles : {commande.nombreArticles}
+                </p>
+
+                <p>
+                  Produits :{" "}
+                  {euros(commande.produitsTtcCents)}
+                </p>
+
+                <p>
+                  Livraison :{" "}
+                  {commande.livraisonTtcCents === 0
+                    ? "Offerte"
+                    : euros(commande.livraisonTtcCents)}
+                </p>
+
+                <div
+                  style={{
+                    borderTop: `1px solid ${border}`,
+                    marginTop: 20,
+                    paddingTop: 20,
+                  }}
+                >
+                  <h2 style={{ color: gold }}>
+                    Total : {euros(commande.totalTtcCents)}
+                  </h2>
+
+                  <p>
+                    Acompte à régler :{" "}
+                    <strong>
+                      {euros(commande.acompteCents)}
+                    </strong>
+                  </p>
+
+                  <p>
+                    Solde à la livraison :{" "}
+                    <strong>
+                      {euros(commande.soldeCents)}
+                    </strong>
+                  </p>
+                </div>
+              </div>
+
+              <p style={{ color: "#bbb" }}>
+                Statut : en attente d'acompte.
+                Aucun paiement n'a encore été effectué.
+              </p>
+
+              <Link
+                href="/"
+                style={{
+                  display: "inline-block",
+                  marginTop: 25,
+                  padding: "16px 30px",
+                  background: gold,
+                  color: "#080808",
+                  textDecoration: "none",
+                  fontWeight: 700,
+                  fontSize: 12,
+                }}
+              >
+                RETOUR AU CATALOGUE
+              </Link>
+            </section>
+          ) : (
+            <>
+              <Link
+                href="/panier"
+                style={{
+                  color: gold,
+                  textDecoration: "none",
+                }}
+              >
+                ← Retour au panier
+              </Link>
+
+              <p
+                className="eyebrow"
+                style={{ marginTop: 45 }}
+              >
+                BLACK CROWN SUPPLY
+              </p>
+
+              <h1
+                style={{
+                  fontSize: "clamp(35px,5vw,58px)",
+                }}
+              >
+                Finaliser ma commande
+              </h1>
+
+              {!ready || loading ? (
+                <p style={{ color: "#999" }}>
+                  Chargement de votre commande…
+                </p>
+              ) : !salon ? (
+                <section style={bloc}>
+                  <h2>Connectez-vous pour commander</h2>
+
+                  <p>
+                    Retrouvez votre compte professionnel
+                    pour finaliser vos achats.
+                  </p>
+
+                  {erreur && (
+                    <p style={{ color: "#ff9999" }}>
+                      {erreur}
+                    </p>
+                  )}
+
+                  <Link
+                    href="/connexion"
+                    style={{ color: gold }}
+                  >
+                    Connexion salon →
+                  </Link>
+                </section>
+              ) : items.length === 0 ? (
+                <section style={bloc}>
+                  <h2>Votre panier est vide</h2>
+
+                  <Link href="/" style={{ color: gold }}>
+                    Retour au catalogue →
+                  </Link>
+                </section>
+              ) : (
+                <>
+                  <section style={bloc}>
+                    <p className="eyebrow">
+                      01 — LIVRAISON
+                    </p>
+
+                    <h2>Votre salon</h2>
+
+                    <p>
+                      <strong>{salon.nom_salon}</strong>
+                    </p>
+
+                    <p>{salon.adresse}</p>
+
+                    <p>
+                      {salon.code_postal} {salon.ville}
+                    </p>
+
+                    <p>{salon.telephone}</p>
+                    <p>{salon.email}</p>
+
+                    <small style={{ color: "#aaa" }}>
+                      Ces coordonnées proviennent de
+                      votre compte professionnel.
+                    </small>
+                  </section>
+
+                  <section style={bloc}>
+                    <p className="eyebrow">
+                      02 — VOTRE SÉLECTION
+                    </p>
+
+                    <h2>Récapitulatif</h2>
+
+                    {items.map((item) => (
+                      <div
+                        key={item.key}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 20,
+                          borderBottom: `1px solid ${border}`,
+                          padding: "16px 0",
+                        }}
+                      >
+                        <div>
+                          <strong>
+                            {item.productName}
+                          </strong>
+
+                          {item.variantName && (
+                            <p style={{ color: gold }}>
+                              {item.variantName}
+                            </p>
+                          )}
+
+                          <small>
+                            Quantité : {item.quantity}
+                          </small>
+                        </div>
+
+                        <strong>
+                          {euros(
+                            item.priceCents * item.quantity
+                          )}
+                        </strong>
+                      </div>
+                    ))}
+
+                    <p style={{ marginTop: 25 }}>
+                      {totalQuantity} articles
+                    </p>
+
+                    <div
+                      style={{
+                        borderTop: `1px solid ${border}`,
+                        marginTop: 20,
+                        paddingTop: 20,
+                      }}
+                    >
+                      <p>
+                        Total produits TTC :{" "}
+                        <strong>
+                          {euros(totalCents)}
+                        </strong>
+                      </p>
+
+                      <p>
+                        Livraison :{" "}
+                        <strong
+                          style={{
+                            color: francoAtteint
+                              ? "#80c998"
+                              : cream,
+                          }}
+                        >
+                          {francoAtteint
+                            ? "Offerte"
+                            : "14,40 € TTC (12 € HT)"}
+                        </strong>
+                      </p>
+
+                      {!francoAtteint && (
+                        <p
+                          style={{
+                            color: gold,
+                            fontSize: 13,
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          Encore{" "}
+                          {euros(resteFrancoCents)} TTC
+                          d'achats pour bénéficier
+                          de la livraison offerte.
+                        </p>
+                      )}
+
+                      <h2
+                        style={{
+                          color: gold,
+                          marginTop: 25,
+                        }}
+                      >
+                        Total TTC :{" "}
+                        {euros(totalAvecLivraison)}
+                      </h2>
+                    </div>
+
+                    <small style={{ color: "#aaa" }}>
+                      Livraison offerte à partir de
+                      500 € HT d'achats.
+                      Le montant définitif est recalculé
+                      par le serveur lors de la commande.
+                    </small>
+                  </section>
+
+                  <section style={bloc}>
+                    <p className="eyebrow">
+                      03 — VOS DEMANDES
+                    </p>
+
+                    <h2>Un besoin particulier ?</h2>
+
+                    <label htmlFor="demande-produit">
+                      Un produit manque à notre catalogue ?
+                    </label>
+
+                    <textarea
+                      id="demande-produit"
+                      value={demande}
+                      onChange={(e) =>
+                        setDemande(e.target.value)
+                      }
+                      placeholder={
+                        "Marque, référence, " +
+                        "quantité souhaitée..."
+                      }
+                      rows={4}
+                      maxLength={2000}
+                      style={champ}
+                    />
+
+                    <label htmlFor="commentaire">
+                      Commentaire sur votre commande
+                    </label>
+
+                    <textarea
+                      id="commentaire"
+                      value={commentaire}
+                      onChange={(e) =>
+                        setCommentaire(e.target.value)
+                      }
+                      placeholder={
+                        "Précisions pour votre livraison..."
+                      }
+                      rows={4}
+                      maxLength={2000}
+                      style={champ}
+                    />
+                  </section>
+
+                  <section style={bloc}>
+                    <p className="eyebrow">
+                      04 — VALIDATION
+                    </p>
+
+                    <h2>Votre commande</h2>
+
+                    <p>
+                      Total TTC :{" "}
+                      <strong>
+                        {euros(totalAvecLivraison)}
+                      </strong>
+                    </p>
+
+                    <p>
+                      Acompte de 50 % :{" "}
+                      <strong style={{ color: gold }}>
+                        {euros(acompteCents)}
+                      </strong>
+                    </p>
+
+                    <p>
+                      Solde à la livraison :{" "}
+                      <strong>
+                        {euros(soldeCents)}
+                      </strong>
+                    </p>
+
+                    <p
+                      style={{
+                        color: "#aaa",
+                        fontSize: 13,
+                        lineHeight: 1.7,
+                        margin: "25px 0",
+                      }}
+                    >
+                      En confirmant, votre commande
+                      sera enregistrée avec le statut
+                      « En attente d'acompte ».
+                      Aucun paiement ne sera prélevé
+                      à cette étape.
+                    </p>
+
+                    {erreur && (
+                      <div
+                        role="alert"
+                        style={{
+                          padding: 16,
+                          marginBottom: 20,
+                          color: "#ffaaaa",
+                          background: "#351b1b",
+                          border: "1px solid #a44",
+                        }}
+                      >
+                        {erreur}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={envoi}
+                      onClick={confirmerCommande}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: 19,
+                        background: envoi
+                          ? "#554a31"
+                          : gold,
+                        color: envoi
+                          ? "#ddd"
+                          : "#080808",
+                        border: 0,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        letterSpacing: 1,
+                        cursor: envoi
+                          ? "wait"
+                          : "pointer",
+                      }}
+                    >
+                      {envoi
+                        ? "ENREGISTREMENT EN COURS…"
+                        : "CONFIRMER MA COMMANDE"}
+                    </button>
+                  </section>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
