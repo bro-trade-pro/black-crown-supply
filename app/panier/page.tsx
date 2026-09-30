@@ -25,13 +25,10 @@ export default function CartPage() {
 
   return (
     <main className="productPage">
-      {/* CONTENU */}
       <section className="content productContent">
         <header>
           <span>BLACK CROWN SUPPLY</span>
-          <div>
-            Catalogue professionnel · Prix TTC
-          </div>
+          <div>Catalogue professionnel · Prix TTC</div>
         </header>
 
         <div
@@ -52,10 +49,7 @@ export default function CartPage() {
             ← Continuer mes achats
           </Link>
 
-          <p
-            className="eyebrow"
-            style={{ marginTop: 55 }}
-          >
+          <p className="eyebrow" style={{ marginTop: 55 }}>
             VOTRE COMMANDE
           </p>
 
@@ -75,8 +69,8 @@ export default function CartPage() {
               marginBottom: 38,
             }}
           >
-            Vérifiez vos références et vos quantités
-            avant de passer commande.
+            Vérifiez vos références et vos quantités avant de
+            passer commande.
           </p>
 
           {!ready ? (
@@ -113,8 +107,7 @@ export default function CartPage() {
               </h2>
 
               <p style={{ color: "#999" }}>
-                Retrouvez toutes nos références
-                dans le catalogue.
+                Retrouvez toutes nos références dans le catalogue.
               </p>
 
               <Link
@@ -136,13 +129,7 @@ export default function CartPage() {
             </div>
           ) : (
             <>
-              {/* LISTE DES ARTICLES */}
-              <div
-                style={{
-                  display: "grid",
-                  gap: 12,
-                }}
-              >
+              <div style={{ display: "grid", gap: 12 }}>
                 {items.map((item) => (
                   <article
                     key={item.key}
@@ -156,7 +143,6 @@ export default function CartPage() {
                       background: "#111",
                     }}
                   >
-                    {/* PHOTO */}
                     <Link
                       href={`/produit/${item.productId}`}
                       style={{
@@ -181,17 +167,13 @@ export default function CartPage() {
                         />
                       ) : (
                         <span
-                          style={{
-                            color: "#111",
-                            fontSize: 10,
-                          }}
+                          style={{ color: "#111", fontSize: 10 }}
                         >
                           BLACK CROWN
                         </span>
                       )}
                     </Link>
 
-                    {/* PRODUIT */}
                     <div
                       style={{
                         flex: "1 1 210px",
@@ -220,9 +202,7 @@ export default function CartPage() {
                           }}
                         >
                           Couleur / variante :{" "}
-                          <strong>
-                            {item.variantName}
-                          </strong>
+                          <strong>{item.variantName}</strong>
                         </p>
                       )}
 
@@ -232,15 +212,12 @@ export default function CartPage() {
                           fontSize: 12,
                         }}
                       >
-                        Prix unitaire :{" "}
-                        {money(item.priceCents)} TTC
+                        Prix unitaire : {money(item.priceCents)} TTC
                       </p>
 
                       <button
                         type="button"
-                        onClick={() =>
-                          removeItem(item.key)
-                        }
+                        onClick={() => removeItem(item.key)}
                         style={{
                           border: 0,
                           padding: 0,
@@ -256,21 +233,15 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    {/* QUANTITÉ */}
                     <div
                       className="quantityControl"
-                      style={{
-                        marginLeft: "auto",
-                      }}
+                      style={{ marginLeft: "auto" }}
                     >
                       <button
                         type="button"
                         aria-label={`Diminuer ${item.productName}`}
                         onClick={() =>
-                          updateQuantity(
-                            item.key,
-                            item.quantity - 1
-                          )
+                          updateQuantity(item.key, item.quantity - 1)
                         }
                       >
                         −
@@ -282,17 +253,13 @@ export default function CartPage() {
                         type="button"
                         aria-label={`Augmenter ${item.productName}`}
                         onClick={() =>
-                          updateQuantity(
-                            item.key,
-                            item.quantity + 1
-                          )
+                          updateQuantity(item.key, item.quantity + 1)
                         }
                       >
                         +
                       </button>
                     </div>
 
-                    {/* SOUS-TOTAL */}
                     <div
                       style={{
                         minWidth: 105,
@@ -318,17 +285,13 @@ export default function CartPage() {
                           fontWeight: 400,
                         }}
                       >
-                        {money(
-                          item.priceCents *
-                            item.quantity
-                        )}
+                        {money(item.priceCents * item.quantity)}
                       </strong>
                     </div>
                   </article>
                 ))}
               </div>
 
-              {/* RÉCAPITULATIF */}
               <div
                 style={{
                   maxWidth: 440,
@@ -338,10 +301,7 @@ export default function CartPage() {
                   background: "#12110e",
                 }}
               >
-                <p
-                  className="eyebrow"
-                  style={{ marginTop: 0 }}
-                >
+                <p className="eyebrow" style={{ marginTop: 0 }}>
                   RÉCAPITULATIF
                 </p>
 
@@ -401,8 +361,8 @@ export default function CartPage() {
                   }}
                 >
                   Hors éventuels frais de livraison.
-                  Le montant définitif sera confirmé
-                  lors de la validation.
+                  Le montant définitif sera confirmé lors de
+                  la validation.
                 </p>
 
                 <div
@@ -416,35 +376,29 @@ export default function CartPage() {
                   }}
                 >
                   Acompte prévu à la commande :{" "}
-                  <strong style={{ color: gold }}>
-                    50 %
-                  </strong>
+                  <strong style={{ color: gold }}>50 %</strong>
                   <br />
                   Solde prévu à la livraison :{" "}
-                  <strong style={{ color: gold }}>
-                    50 %
-                  </strong>
+                  <strong style={{ color: gold }}>50 %</strong>
                 </div>
 
-                <button
-                  type="button"
-                  disabled
-                  title="Disponible prochainement"
+                <Link
+                  href="/commande"
                   style={{
+                    display: "block",
                     width: "100%",
                     padding: 17,
-                    background: "#554a31",
-                    border: 0,
-                    color: "#c9c1b1",
+                    background: gold,
+                    color: "#080808",
+                    textAlign: "center",
+                    textDecoration: "none",
                     fontSize: 11,
                     fontWeight: 700,
                     letterSpacing: 1,
-                    cursor: "not-allowed",
                   }}
                 >
-                  VALIDER MA COMMANDE
-                  — BIENTÔT DISPONIBLE
-                </button>
+                  FINALISER MA COMMANDE →
+                </Link>
               </div>
 
               <div style={{ marginTop: 30 }}>
