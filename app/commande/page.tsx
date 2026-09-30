@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabase";
 const gold = "#c8a75b";
 const cream = "#f4efe4";
 const border = "#40351f";
+const FRANCO_TTC = 60000;
+const LIVRAISON_TTC = 1440;
 
 type Salon = {
   nom_salon: string;
@@ -70,14 +72,23 @@ export default function CommandePage() {
   const [commande, setCommande] =
     useState<CommandeCreee | null>(null);
 
-  // Tarifs : 12 € HT sous 500 € HT de produits.
-  // Hypothèse : TVA de 20 % sur tous les produits.
-  const francoAtteint = totalCents >= 60000;
-  const livraisonCents = francoAtteint ? 0 : 1440;
-  const totalAvecLivraison = totalCents + livraisonCents;
-  const acompteCents = Math.ceil(totalAvecLivraison / 2);
-  const soldeCents = totalAvecLivraison - acompteCents;
-  const resteFrancoCents = Math.max(0, 60000 - totalCents);
+  // Hypothèse actuelle : TVA de 20 %.
+  const totalHT = totalCents / 1.2;
+  const francoAtteint = totalCents >= FRANCO_TTC;
+  const resteTTC = Math.max(0, FRANCO_TTC - totalCents);
+  const progression = Math.min(
+    100,
+    (totalCents / FRANCO_TTC) * 100
+  );
+  const livraisonCents = francoAtteint
+    ? 0
+    : LIVRAISON_TTC;
+  const totalAvecLivraison =
+    totalCents + livraisonCents;
+  const acompteCents =
+    Math.ceil(totalAvecLivraison / 2);
+  const soldeCents =
+    totalAvecLivraison - acompteCents;
 
   useEffect(() => {
     async function chargerSalon() {
@@ -87,10 +98,7 @@ export default function CommandePage() {
 
         if (authError) throw authError;
 
-        if (!auth.user) {
-          setLoading(false);
-          return;
-        }
+        if (!auth.user) return;
 
         const { data: profil, error: profilError } =
           await supabase
@@ -112,7 +120,6 @@ export default function CommandePage() {
               .single();
 
           if (salonError) throw salonError;
-
           setSalon(data);
         }
       } catch (error) {
@@ -141,8 +148,6 @@ export default function CommandePage() {
     setErreur("");
 
     try {
-      // Le serveur récupère lui-même les vrais prix.
-      // On ne transmet aucun prix calculé par le navigateur.
       const articles = items.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
@@ -167,15 +172,13 @@ export default function CommandePage() {
         typeof data.numero !== "string"
       ) {
         throw new Error(
-          "La réponse du serveur est incomplète. " +
+          "Réponse du serveur incomplète. " +
           "Vérifiez vos commandes avant de réessayer."
         );
       }
 
       const resultat = data as CommandeCreee;
 
-      // Le panier n'est vidé qu'après confirmation
-      // de l'enregistrement par Supabase.
       setCommande(resultat);
       clearCart();
     } catch (error) {
@@ -237,7 +240,12 @@ export default function CommandePage() {
                 Merci pour votre commande !
               </h1>
 
-              <p style={{ color: "#bbb", fontSize: 15 }}>
+              <p
+                style={{
+                  color: "#bbb",
+                  fontSize: 15,
+                }}
+              >
                 Votre commande a bien été enregistrée.
                 Votre panier est maintenant vide.
               </p>
@@ -252,7 +260,12 @@ export default function CommandePage() {
                   textAlign: "left",
                 }}
               >
-                <p style={{ color: "#999", fontSize: 12 }}>
+                <p
+                  style={{
+                    color: "#999",
+                    fontSize: 12,
+                  }}
+                >
                   NUMÉRO DE COMMANDE
                 </p>
 
@@ -278,7 +291,9 @@ export default function CommandePage() {
                   Livraison :{" "}
                   {commande.livraisonTtcCents === 0
                     ? "Offerte"
-                    : euros(commande.livraisonTtcCents)}
+                    : euros(
+                        commande.livraisonTtcCents
+                      )}
                 </p>
 
                 <div
@@ -289,7 +304,8 @@ export default function CommandePage() {
                   }}
                 >
                   <h2 style={{ color: gold }}>
-                    Total : {euros(commande.totalTtcCents)}
+                    Total :{" "}
+                    {euros(commande.totalTtcCents)}
                   </h2>
 
                   <p>
@@ -313,21 +329,26 @@ export default function CommandePage() {
                 Aucun paiement n'a encore été effectué.
               </p>
 
-              <Link
-                href="/"
+              <div
                 style={{
-                  display: "inline-block",
+                  display: "flex",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  gap: 12,
                   marginTop: 25,
-                  padding: "16px 30px",
-                  background: gold,
-                  color: "#080808",
-                  textDecoration: "none",
-                  fontWeight: 700,
-                  fontSize: 12,
                 }}
               >
-                RETOUR AU CATALOGUE
-              </Link>
+                <Link href="/" style={boutonOr}>
+                  RETOUR AU CATALOGUE
+                </Link>
+
+                <Link
+                  href="/mes-commandes"
+                  style={boutonContour}
+                >
+                  MES COMMANDES →
+                </Link>
+              </div>
             </section>
           ) : (
             <>
@@ -406,15 +427,16 @@ export default function CommandePage() {
                     <p>{salon.adresse}</p>
 
                     <p>
-                      {salon.code_postal} {salon.ville}
+                      {salon.code_postal}{" "}
+                      {salon.ville}
                     </p>
 
                     <p>{salon.telephone}</p>
                     <p>{salon.email}</p>
 
                     <small style={{ color: "#aaa" }}>
-                      Ces coordonnées proviennent de
-                      votre compte professionnel.
+                      Ces coordonnées proviennent
+                      de votre compte professionnel.
                     </small>
                   </section>
 
@@ -430,9 +452,11 @@ export default function CommandePage() {
                         key={item.key}
                         style={{
                           display: "flex",
-                          justifyContent: "space-between",
+                          justifyContent:
+                            "space-between",
                           gap: 20,
-                          borderBottom: `1px solid ${border}`,
+                          borderBottom:
+                            `1px solid ${border}`,
                           padding: "16px 0",
                         }}
                       >
@@ -442,19 +466,25 @@ export default function CommandePage() {
                           </strong>
 
                           {item.variantName && (
-                            <p style={{ color: gold }}>
+                            <p
+                              style={{
+                                color: gold,
+                              }}
+                            >
                               {item.variantName}
                             </p>
                           )}
 
                           <small>
-                            Quantité : {item.quantity}
+                            Quantité :{" "}
+                            {item.quantity}
                           </small>
                         </div>
 
                         <strong>
                           {euros(
-                            item.priceCents * item.quantity
+                            item.priceCents *
+                              item.quantity
                           )}
                         </strong>
                       </div>
@@ -466,11 +496,21 @@ export default function CommandePage() {
 
                     <div
                       style={{
-                        borderTop: `1px solid ${border}`,
+                        borderTop:
+                          `1px solid ${border}`,
                         marginTop: 20,
                         paddingTop: 20,
                       }}
                     >
+                      <p>
+                        Total produits HT :{" "}
+                        <strong>
+                          {euros(
+                            Math.round(totalHT)
+                          )}
+                        </strong>
+                      </p>
+
                       <p>
                         Total produits TTC :{" "}
                         <strong>
@@ -478,12 +518,102 @@ export default function CommandePage() {
                         </strong>
                       </p>
 
+                      <div
+                        style={{
+                          padding: 20,
+                          margin: "25px 0",
+                          border:
+                            `1px solid ${border}`,
+                          background: "#100f0d",
+                        }}
+                      >
+                        {francoAtteint ? (
+                          <p
+                            style={{
+                              color: "#8ed3a2",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ✓ Livraison offerte !
+                          </p>
+                        ) : (
+                          <p
+                            style={{
+                              color: gold,
+                              fontWeight: 700,
+                              lineHeight: 1.7,
+                            }}
+                          >
+                            Plus que{" "}
+                            {euros(resteTTC)} TTC
+                            pour la livraison offerte !
+                          </p>
+                        )}
+
+                        <div
+                          style={{
+                            height: 10,
+                            background: "#383126",
+                            borderRadius: 20,
+                            overflow: "hidden",
+                            margin: "18px 0 10px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width:
+                                `${progression}%`,
+                              height: "100%",
+                              background:
+                                francoAtteint
+                                  ? "#8ed3a2"
+                                  : gold,
+                              borderRadius: 20,
+                            }}
+                          />
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                            gap: 12,
+                            color: "#aaa",
+                            fontSize: 12,
+                          }}
+                        >
+                          <span>
+                            {euros(
+                              Math.round(totalHT)
+                            )}{" "}
+                            HT
+                          </span>
+                          <span>
+                            500 € HT
+                          </span>
+                        </div>
+
+                        <p
+                          style={{
+                            color: "#aaa",
+                            fontSize: 12,
+                            lineHeight: 1.7,
+                            marginBottom: 0,
+                          }}
+                        >
+                          Franco de port :
+                          500 € HT,
+                          soit 600 € TTC.
+                        </p>
+                      </div>
+
                       <p>
                         Livraison :{" "}
                         <strong
                           style={{
                             color: francoAtteint
-                              ? "#80c998"
+                              ? "#8ed3a2"
                               : cream,
                           }}
                         >
@@ -493,21 +623,6 @@ export default function CommandePage() {
                         </strong>
                       </p>
 
-                      {!francoAtteint && (
-                        <p
-                          style={{
-                            color: gold,
-                            fontSize: 13,
-                            lineHeight: 1.7,
-                          }}
-                        >
-                          Encore{" "}
-                          {euros(resteFrancoCents)} TTC
-                          d'achats pour bénéficier
-                          de la livraison offerte.
-                        </p>
-                      )}
-
                       <h2
                         style={{
                           color: gold,
@@ -515,15 +630,18 @@ export default function CommandePage() {
                         }}
                       >
                         Total TTC :{" "}
-                        {euros(totalAvecLivraison)}
+                        {euros(
+                          totalAvecLivraison
+                        )}
                       </h2>
                     </div>
 
-                    <small style={{ color: "#aaa" }}>
-                      Livraison offerte à partir de
-                      500 € HT d'achats.
-                      Le montant définitif est recalculé
-                      par le serveur lors de la commande.
+                    <small
+                      style={{ color: "#aaa" }}
+                    >
+                      Le montant définitif
+                      sera recalculé par le serveur
+                      lors de la commande.
                     </small>
                   </section>
 
@@ -532,17 +650,22 @@ export default function CommandePage() {
                       03 — VOS DEMANDES
                     </p>
 
-                    <h2>Un besoin particulier ?</h2>
+                    <h2>
+                      Un besoin particulier ?
+                    </h2>
 
                     <label htmlFor="demande-produit">
-                      Un produit manque à notre catalogue ?
+                      Un produit manque
+                      à notre catalogue ?
                     </label>
 
                     <textarea
                       id="demande-produit"
                       value={demande}
                       onChange={(e) =>
-                        setDemande(e.target.value)
+                        setDemande(
+                          e.target.value
+                        )
                       }
                       placeholder={
                         "Marque, référence, " +
@@ -554,17 +677,21 @@ export default function CommandePage() {
                     />
 
                     <label htmlFor="commentaire">
-                      Commentaire sur votre commande
+                      Commentaire sur
+                      votre commande
                     </label>
 
                     <textarea
                       id="commentaire"
                       value={commentaire}
                       onChange={(e) =>
-                        setCommentaire(e.target.value)
+                        setCommentaire(
+                          e.target.value
+                        )
                       }
                       placeholder={
-                        "Précisions pour votre livraison..."
+                        "Précisions pour " +
+                        "votre livraison..."
                       }
                       rows={4}
                       maxLength={2000}
@@ -582,13 +709,17 @@ export default function CommandePage() {
                     <p>
                       Total TTC :{" "}
                       <strong>
-                        {euros(totalAvecLivraison)}
+                        {euros(
+                          totalAvecLivraison
+                        )}
                       </strong>
                     </p>
 
                     <p>
                       Acompte de 50 % :{" "}
-                      <strong style={{ color: gold }}>
+                      <strong
+                        style={{ color: gold }}
+                      >
                         {euros(acompteCents)}
                       </strong>
                     </p>
@@ -608,11 +739,12 @@ export default function CommandePage() {
                         margin: "25px 0",
                       }}
                     >
-                      En confirmant, votre commande
-                      sera enregistrée avec le statut
+                      En confirmant, votre
+                      commande sera enregistrée
+                      avec le statut
                       « En attente d'acompte ».
-                      Aucun paiement ne sera prélevé
-                      à cette étape.
+                      Aucun paiement ne sera
+                      prélevé à cette étape.
                     </p>
 
                     {erreur && (
@@ -623,7 +755,8 @@ export default function CommandePage() {
                           marginBottom: 20,
                           color: "#ffaaaa",
                           background: "#351b1b",
-                          border: "1px solid #a44",
+                          border:
+                            "1px solid #a44",
                         }}
                       >
                         {erreur}
@@ -633,7 +766,9 @@ export default function CommandePage() {
                     <button
                       type="button"
                       disabled={envoi}
-                      onClick={confirmerCommande}
+                      onClick={
+                        confirmerCommande
+                      }
                       style={{
                         display: "block",
                         width: "100%",
@@ -667,3 +802,23 @@ export default function CommandePage() {
     </main>
   );
 }
+
+const boutonOr = {
+  display: "inline-block" as const,
+  padding: "16px 25px",
+  background: gold,
+  color: "#080808",
+  textDecoration: "none",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
+const boutonContour = {
+  display: "inline-block" as const,
+  padding: "15px 24px",
+  border: `1px solid ${gold}`,
+  color: gold,
+  textDecoration: "none",
+  fontSize: 12,
+  fontWeight: 700,
+};
