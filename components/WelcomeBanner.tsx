@@ -19,8 +19,9 @@ export default function WelcomeBanner() {
     let active = true;
 
     async function load() {
-      const { data: { user } } =
-        await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!active) return;
 
@@ -67,7 +68,6 @@ export default function WelcomeBanner() {
     };
   }, [pathname]);
 
-  // Pas de bandeau pour les visiteurs non connectés.
   if (!info) return null;
 
   return (
@@ -78,9 +78,8 @@ export default function WelcomeBanner() {
         </span>
 
         <h2>
-          Bienvenue{info.prenom
-            ? ` ${info.prenom}`
-            : ""} !
+          Bienvenue
+          {info.prenom ? ` ${info.prenom}` : ""} !
         </h2>
 
         <strong>{info.nomSalon}</strong>
@@ -97,10 +96,9 @@ export default function WelcomeBanner() {
           MON PANIER →
         </Link>
 
-        <small>
-          Historique des commandes :
-          prochainement
-        </small>
+        <Link href="/mes-commandes">
+          MES COMMANDES →
+        </Link>
       </div>
     </section>
   );
