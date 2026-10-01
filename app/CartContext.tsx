@@ -25,7 +25,7 @@ export type NewCartItem = Omit<CartItem, "key">;
 type CartContextType = {
   items: CartItem[];
   ready: boolean;
-  addItems: (newItems: NewCartItem[]) => void;
+  addItems: (items: NewCartItem[]) => void;
   updateQuantity: (key: string, quantity: number) => void;
   removeItem: (key: string) => void;
   clearCart: () => void;
@@ -35,55 +35,81 @@ type CartContextType = {
 
 const STORAGE_KEY = "black-crown-cart";
 
-const CartContext = createContext<CartContextType | null>(null);
+const CartContext =
+  createContext<CartContextType | null>(null);
 
 function makeKey(item: NewCartItem) {
   return `${item.productId}:${item.variantId ?? "base"}`;
 }
 
-export function CartProvider({ children }: { children: ReactNode }) {
+function lirePanier(): CartItem[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) return [];
+
+    const parsed: unknown = JSON.parse(saved);
+
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter(
+      (item): item is CartItem =>
+        item !== null &&
+        typeof item === "object" &&
+        typeof item.key === "string" &&
+        typeof item.productId === "string" &&
+        typeof item.quantity === "number" &&
+        Number.isInteger(item.quantity) &&
+        item.quantity > 0 &&
+        typeof item.priceCents === "number"
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function CartProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
 
-  // Récupération du panier enregistré dans le navigateur.
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+    setItems(lirePanier());
+    setReady(true);
 
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-
-        if (Array.isArray(parsed)) {
-          setItems(
-            parsed.filter(
-              (item): item is CartItem =>
-                item !== null &&
-                typeof item === "object" &&
-                typeof item.key === "string" &&
-                typeof item.productId === "string" &&
-                typeof item.quantity === "number" &&
-                Number.isInteger(item.quantity) &&
-                item.quantity > 0 &&
-                typeof item.priceCents === "number"
-            )
-          );
-        }
+    // Synchronise les autres onglets du même site.
+    function synchroniser(event: StorageEvent) {
+      if (event.key === STORAGE_KEY) {
+        setItems(lirePanier());
       }
-    } catch (error) {
-      console.error("Impossible de récupérer le panier :", error);
     }
 
-    setReady(true);
+    window.addEventListener(
+      "storage",
+      synchroniser
+    );
+
+    return () => {
+      window.removeEventListener(
+        "storage",
+        synchroniser
+      );
+    };
   }, []);
 
-  // Enregistrement après chaque modification.
   useEffect(() => {
     if (!ready) return;
 
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (error) {
-      console.error("Impossible d'enregistrer le panier :", error);
+    if (items.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(items)
+      );
     }
   }, [items, ready]);
 
@@ -92,24 +118,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const next = [...current];
 
       for (const item of newItems) {
-        if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+        if (
+          !Number.isInteger(item.quantity) ||
+          item.quantity <= 0
+        ) {
           continue;
         }
 
         const key = makeKey(item);
-        const existingIndex = next.findIndex(
+
+        const index = next.findIndex(
           (existing) => existing.key === key
         );
 
-        if (existingIndex >= 0) {
-          next[existingIndex] = {
+        if (index >= 0) {
+          next[index] = {
             ...item,
             key,
             quantity:
-              next[existingIndex].quantity + item.quantity,
+              next[index].quantity +
+              item.quantity,
           };
         } else {
-          next.push({ ...item, key });
+          next.push({
+            ...item,
+            key,
+          });
         }
       }
 
@@ -117,35 +151,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function updateQuantity(key: string, quantity: number) {
-    if (!Number.isInteger(quantity) || quantity < 0) return;
+  function updateQuantity(
+    key: string,
+    quantity: number
+  ) {
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 0
+    ) {
+      return;
+    }
 
     setItems((current) =>
       quantity === 0
-        ? current.filter((item) => item.key !== key)
+        ? current.filter(
+            (item) => item.key !== key
+          )
         : current.map((item) =>
-            item.key === key ? { ...item, quantity } : item
+            item.key === key
+              ? { ...item, quantity }
+              : item
           )
     );
   }
 
   function removeItem(key: string) {
     setItems((current) =>
-      current.filter((item) => item.key !== key)
+      current.filter(
+        (item) => item.key !== key
+      )
     );
   }
 
   function clearCart() {
+    // Effacement immédiat, sans attendre React.
+    localStorage.removeItem(STORAGE_KEY);
     setItems([]);
   }
 
   const totalQuantity = items.reduce(
-    (total, item) => total + item.quantity,
+    (sum, item) => sum + item.quantity,
     0
   );
 
   const totalCents = items.reduce(
-    (total, item) => total + item.priceCents * item.quantity,
+    (sum, item) =>
+      sum + item.priceCents * item.quantity,
     0
   );
 
