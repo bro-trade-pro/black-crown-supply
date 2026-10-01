@@ -1,7 +1,6 @@
 
 import type { Metadata } from "next";
-import Sidebar from "@/components/Sidebar";
-import WelcomeBanner from "@/components/WelcomeBanner";
+import SiteShell from "@/components/SiteShell";
 import { CartProvider } from "@/app/CartContext";
 import "./globals.css";
 
@@ -20,14 +19,7 @@ export default function RootLayout({
     <html lang="fr">
       <body>
         <CartProvider>
-          <div className="siteLayout">
-            <Sidebar />
-
-            <div className="siteMain">
-              <WelcomeBanner />
-              {children}
-            </div>
-          </div>
+          <SiteShell>{children}</SiteShell>
         </CartProvider>
       </body>
     </html>
