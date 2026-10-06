@@ -629,7 +629,10 @@ export default function MesCommandesPage() {
                                       fontSize: 13,
                                     }}
                                   >
-                                    {article.nomVariante}
+                                    Couleur / variante :{" "}
+                                    <strong>
+                                      {article.nomVariante}
+                                    </strong>
                                   </p>
                                 )}
 
