@@ -664,7 +664,10 @@ export default function AdminPage() {
 
                                 {article.nomVariante && (
                                   <p style={{ color: GOLD }}>
-                                    {article.nomVariante}
+                                    Couleur / variante :{" "}
+                                    <strong>
+                                      {article.nomVariante}
+                                    </strong>
                                   </p>
                                 )}
 
