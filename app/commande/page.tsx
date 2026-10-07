@@ -68,6 +68,7 @@ export default function CommandePage() {
   const [demande, setDemande] = useState("");
   const [commentaire, setCommentaire] = useState("");
   const [envoi, setEnvoi] = useState(false);
+  const [cgvAcceptees, setCgvAcceptees] = useState(false);
   const [erreur, setErreur] = useState("");
   const [commande, setCommande] =
     useState<CommandeCreee | null>(null);
@@ -141,6 +142,11 @@ export default function CommandePage() {
 
     if (items.length === 0) {
       setErreur("Votre panier est vide.");
+      return;
+    }
+
+    if (!cgvAcceptees) {
+      setErreur("Vous devez accepter les Conditions Générales de Vente pour confirmer votre commande.");
       return;
     }
 
@@ -746,6 +752,36 @@ export default function CommandePage() {
                       Aucun paiement ne sera
                       prélevé à cette étape.
                     </p>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 12,
+                        margin: "22px 0",
+                        color: "#ccc",
+                        fontSize: 13,
+                        lineHeight: 1.6,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={cgvAcceptees}
+                        onChange={(e) => setCgvAcceptees(e.target.checked)}
+                        style={{ marginTop: 4 }}
+                      />
+                      <span>
+                        J'ai lu et j'accepte les{" "}
+                        <Link
+                          href="/cgv"
+                          target="_blank"
+                          style={{ color: gold }}
+                        >
+                          Conditions Générales de Vente
+                        </Link>.
+                      </span>
+                    </label>
 
                     {erreur && (
                       <div
