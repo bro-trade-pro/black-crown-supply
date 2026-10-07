@@ -979,7 +979,11 @@ export default function AdminPage() {
                                   }}
                                 >
                                   <strong
-                                    style={{ color: GOLD }}
+                                    style={{
+                                      color: GOLD,
+                                      display: "block",
+                                      marginBottom: 6,
+                                    }}
                                   >
                                     {nomAction(
                                       evenement.action
