@@ -131,6 +131,17 @@ export default function Sidebar() {
             Mes commandes
           </Link>
         )}
+
+        <Link
+          href="/cgv"
+          style={
+            pathname === "/cgv"
+              ? { color: "#c8a75b" }
+              : undefined
+          }
+        >
+          CGV
+        </Link>
       </nav>
 
       <div className="pro">
