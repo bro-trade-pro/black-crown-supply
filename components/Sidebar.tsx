@@ -142,6 +142,28 @@ export default function Sidebar() {
         >
           CGV
         </Link>
+
+        <Link
+          href="/mentions-legales"
+          style={
+            pathname === "/mentions-legales"
+              ? { color: "#c8a75b" }
+              : undefined
+          }
+        >
+          Mentions légales
+        </Link>
+
+        <Link
+          href="/confidentialite"
+          style={
+            pathname === "/confidentialite"
+              ? { color: "#c8a75b" }
+              : undefined
+          }
+        >
+          Confidentialité
+        </Link>
       </nav>
 
       <div className="pro">
