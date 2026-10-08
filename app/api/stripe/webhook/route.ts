@@ -114,9 +114,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, paid: false });
     }
 
-    // Le site n'accepte actuellement que des paiements de test.
-    // Ne jamais traiter des paiements réels avec cette configuration.
-    if (session.livemode !== false || session.mode !== "payment") {
+    const isLive = session.livemode === true;
+    const expectedSecret = isLive ? process.env.STRIPE_WEBHOOK_SECRET : process.env.STRIPE_TEST_WEBHOOK_SECRET;
+    if (!expectedSecret || !verifyStripeSignature(payload, signature, expectedSecret) || (isLive && process.env.STRIPE_LIVE_ENABLED !== "true") || session.mode !== "payment") {
       console.error("Stripe: mode de paiement inattendu.");
       return NextResponse.json({ error: "Mode Stripe non autorisé." }, { status: 400 });
     }
