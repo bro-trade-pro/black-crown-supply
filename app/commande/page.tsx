@@ -374,10 +374,10 @@ export default function CommandePage() {
                 onClick={payerAcompte}
                 style={{ ...boutonOr, border: 0, cursor: paiementEnCours ? "wait" : "pointer", marginTop: 20 }}
               >
-                {paiementEnCours ? "OUVERTURE DU PAIEMENT…" : "RÉGLER MON ACOMPTE PAR CARTE (TEST) →"}
+                {paiementEnCours ? "OUVERTURE DU PAIEMENT…" : "RÉGLER MON ACOMPTE PAR CARTE →"}
               </button>
               <p style={{ color: "#aaa", fontSize: 12 }}>
-                Mode test Stripe : aucune carte réelle ne sera débitée.
+                Paiement sécurisé par Stripe. Votre acompte représente 50 % du total TTC.
               </p>
 
               <div
