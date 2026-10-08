@@ -47,6 +47,14 @@ export async function POST(request: NextRequest) {
       .eq("id", auth.user.id)
       .single();
     if (profileError || !profile?.salon_id) {
+      console.error("Checkout profile lookup failed", {
+        code: profileError?.code ?? null,
+        message: profileError?.message ?? null,
+        details: profileError?.details ?? null,
+        profileFound: Boolean(profile),
+        salonLinked: Boolean(profile?.salon_id),
+        serviceKeyFormat: serviceKey.startsWith("eyJ") ? "legacy-jwt" : serviceKey.startsWith("sb_secret_") ? "new-secret" : "unknown",
+      });
       return NextResponse.json({ error: "Salon introuvable." }, { status: 403 });
     }
     const { data: salon, error: salonError } = await adminDb
