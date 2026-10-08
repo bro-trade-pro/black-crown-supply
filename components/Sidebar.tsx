@@ -106,7 +106,7 @@ export default function Sidebar() {
         <Link href="/#meches">Mèches</Link>
         <Link href="/#cosmetiques">Cosmétiques</Link>
         <Link href="/#avantages">Nos avantages</Link>
-        <Link href="/#contact">Contact</Link>
+        <Link href="/contact" style={pathname === "/contact" ? { color: "#c8a75b" } : undefined}>Contact</Link>
 
         <Link
           href="/panier"
