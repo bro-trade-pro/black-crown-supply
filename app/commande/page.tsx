@@ -69,6 +69,8 @@ export default function CommandePage() {
   const [commentaire, setCommentaire] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [cgvAcceptees, setCgvAcceptees] = useState(false);
+  const [paiementEnCours, setPaiementEnCours] = useState(false);
+  const [erreurPaiement, setErreurPaiement] = useState("");
   const [erreur, setErreur] = useState("");
   const [commande, setCommande] =
     useState<CommandeCreee | null>(null);
@@ -197,6 +199,34 @@ export default function CommandePage() {
       );
     } finally {
       setEnvoi(false);
+    }
+  }
+
+  async function payerAcompte() {
+    if (!commande || paiementEnCours) return;
+    setPaiementEnCours(true);
+    setErreurPaiement("");
+    try {
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session.session?.access_token) {
+        throw new Error("Reconnectez-vous pour régler votre acompte.");
+      }
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+        body: JSON.stringify({ orderId: commande.orderId }),
+      });
+      const result = await response.json();
+      if (!response.ok || typeof result.url !== "string") {
+        throw new Error(result.error || "Impossible d'ouvrir le paiement Stripe.");
+      }
+      window.location.assign(result.url);
+    } catch (error) {
+      setErreurPaiement(error instanceof Error ? error.message : "Paiement indisponible.");
+      setPaiementEnCours(false);
     }
   }
 
@@ -333,6 +363,21 @@ export default function CommandePage() {
               <p style={{ color: "#bbb" }}>
                 Statut : en attente d'acompte.
                 Aucun paiement n'a encore été effectué.
+              </p>
+
+              {erreurPaiement && (
+                <p role="alert" style={{ color: "#ffaaaa" }}>{erreurPaiement}</p>
+              )}
+              <button
+                type="button"
+                disabled={paiementEnCours}
+                onClick={payerAcompte}
+                style={{ ...boutonOr, border: 0, cursor: paiementEnCours ? "wait" : "pointer", marginTop: 20 }}
+              >
+                {paiementEnCours ? "OUVERTURE DU PAIEMENT…" : "RÉGLER MON ACOMPTE PAR CARTE (TEST) →"}
+              </button>
+              <p style={{ color: "#aaa", fontSize: 12 }}>
+                Mode test Stripe : aucune carte réelle ne sera débitée.
               </p>
 
               <div
