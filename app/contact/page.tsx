@@ -20,7 +20,7 @@ export default function ContactPage() {
       setErreur("Merci de renseigner votre nom, votre email et votre message.");
       return;
     }
-    const destinataire = "contact@blackcrownsupply.fr";
+    const destinataire = "flo.blackcrownsup@gmail.com";
     const objet = `[Black Crown Supply] ${sujet}`;
     const corps = `Nom / salon : ${nom}\nEmail : ${email}\n\n${message}`;
     const lien = `mailto:${destinataire}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`;
@@ -49,7 +49,7 @@ export default function ContactPage() {
         </div>
         <div style={{ marginTop: 35, borderTop: "1px solid #40351f", paddingTop: 25 }}>
           <h2 style={{ color: gold, fontFamily: "Georgia,serif", fontWeight: 400 }}>Nous écrire directement</h2>
-          <a href="mailto:contact@blackcrownsupply.fr" style={{ color: "#f4efe4", overflowWrap: "anywhere" }}>contact@blackcrownsupply.fr</a>
+          <a href="mailto:flo.blackcrownsup@gmail.com" style={{ color: "#f4efe4", overflowWrap: "anywhere" }}>flo.blackcrownsup@gmail.com</a>
           <p style={{ color: "#aaa", fontSize: 13 }}>BRO TRADE PRO — Distribution réservée aux professionnels.</p>
         </div>
       </div>
