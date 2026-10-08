@@ -50,12 +50,19 @@ export async function POST(request: NextRequest) {
       console.error("Checkout profile lookup failed", {
         code: profileError?.code ?? null,
         message: profileError?.message ?? null,
-        details: profileError?.details ?? null,
         profileFound: Boolean(profile),
         salonLinked: Boolean(profile?.salon_id),
-        serviceKeyFormat: serviceKey.startsWith("eyJ") ? "legacy-jwt" : serviceKey.startsWith("sb_secret_") ? "new-secret" : "unknown",
       });
-      return NextResponse.json({ error: "Salon introuvable." }, { status: 403 });
+      // Diagnostic sans données personnelles ni secrets, réservé au mode test.
+      const diagnostic = profileError?.code
+        ? `Code Supabase : ${profileError.code}`
+        : !profile
+          ? "Profil absent"
+          : "Salon non associé";
+      return NextResponse.json(
+        { error: `Salon introuvable. ${diagnostic}.` },
+        { status: 403 }
+      );
     }
     const { data: salon, error: salonError } = await adminDb
       .from("salons")
