@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
@@ -96,22 +97,74 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    /*
-      On branchera ici la validation réelle
-      de l'acompte Black Crown.
+    const session = event.data?.object as {
+      id?: string;
+      mode?: string;
+      payment_status?: string;
+      amount_total?: number;
+      currency?: string;
+      payment_intent?: string | { id?: string } | null;
+      client_reference_id?: string | null;
+      metadata?: { order_id?: string; payment_type?: string } | null;
+      livemode?: boolean;
+    } | undefined;
 
-      Pour l'instant :
-      - Stripe envoie l'événement
-      - nous vérifions cryptographiquement sa signature
-      - nous confirmons sa réception
+    if (!session || session.payment_status !== "paid") {
+      // Ne jamais confirmer un acompte avant le paiement effectif.
+      return NextResponse.json({ received: true, paid: false });
+    }
 
-      On ajoutera la mise à jour Supabase après avoir
-      créé notre Checkout Session Stripe.
-    */
+    // Le site n'accepte actuellement que des paiements de test.
+    // Ne jamais traiter des paiements réels avec cette configuration.
+    if (session.livemode !== false || session.mode !== "payment") {
+      console.error("Stripe: mode de paiement inattendu.");
+      return NextResponse.json({ error: "Mode Stripe non autorisé." }, { status: 400 });
+    }
 
-    console.log(
-      "Stripe checkout.session.completed reçu."
-    );
+    const orderId = session.metadata?.order_id;
+    const intentId = typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id;
+    const amount = session.amount_total;
+
+    if (
+      session.metadata?.payment_type !== "acompte" ||
+      !orderId ||
+      session.client_reference_id !== orderId ||
+      !/^[0-9a-f-]{36}$/i.test(orderId) ||
+      !intentId ||
+      !/^pi_[A-Za-z0-9]+$/.test(intentId) ||
+      !Number.isSafeInteger(amount) ||
+      (amount ?? 0) <= 0 ||
+      session.currency?.toLowerCase() !== "eur"
+    ) {
+      console.error("Stripe: métadonnées ou montant invalides.");
+      return NextResponse.json({ error: "Paiement invalide." }, { status: 400 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      console.error("Stripe: configuration Supabase serveur manquante.");
+      return NextResponse.json({ error: "Configuration serveur incomplète." }, { status: 503 });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase.rpc("enregistrer_acompte_stripe", {
+      p_order_id: orderId,
+      p_payment_intent_id: intentId,
+      p_montant_cents: amount,
+    });
+
+    if (error || !data?.success) {
+      console.error("Stripe: échec d'enregistrement de l'acompte", error?.code, error?.message);
+      // Réponse non-2xx pour permettre les nouvelles tentatives de Stripe.
+      return NextResponse.json({ error: "Enregistrement du paiement impossible." }, { status: 500 });
+    }
+
+    console.log("Acompte Stripe enregistré", orderId, data.already_processed ? "déjà traité" : "nouveau");
   }
 
   return NextResponse.json({
