@@ -8,7 +8,8 @@ export async function POST(request: NextRequest) {
     const secret = process.env.STRIPE_SECRET_KEY;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!secret || !url || !anonKey) {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!secret || !url || !anonKey || !serviceKey) {
       return NextResponse.json({ error: "Paiement non configuré." }, { status: 503 });
     }
     // Ne jamais démarrer un paiement réel pendant l'intégration initiale.
@@ -35,15 +36,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Commande invalide." }, { status: 400 });
     }
 
-    // RLS : seules les commandes accessibles à ce salon sont consultables.
-    const { data: order, error: orderError } = await supabase
+    // Les commandes sont lues côté serveur uniquement, après authentification.
+    // Vérifier explicitement l'appartenance au salon et l'auteur de la commande.
+    const adminDb = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: profile, error: profileError } = await adminDb
+      .from("profiles")
+      .select("salon_id")
+      .eq("id", auth.user.id)
+      .single();
+    if (profileError || !profile?.salon_id) {
+      return NextResponse.json({ error: "Salon introuvable." }, { status: 403 });
+    }
+    const { data: salon, error: salonError } = await adminDb
+      .from("salons")
+      .select("id,actif")
+      .eq("id", profile.salon_id)
+      .single();
+    if (salonError || !salon?.actif) {
+      return NextResponse.json({ error: "Salon non actif." }, { status: 403 });
+    }
+    const { data: order, error: orderError } = await adminDb
       .from("orders")
-      .select("id,numero,user_id,statut,acompte_du_cents,acompte_paye_cents")
+      .select("id,numero,user_id,salon_id,statut,acompte_du_cents,acompte_paye_cents")
       .eq("id", orderId)
+      .eq("salon_id", profile.salon_id)
       .eq("user_id", auth.user.id)
       .single();
 
     if (orderError || !order) {
+      console.error("Checkout: commande inaccessible", orderError?.code);
       return NextResponse.json({ error: "Commande introuvable." }, { status: 404 });
     }
     if (order.statut !== "en_attente_acompte" || order.acompte_paye_cents !== 0) {
