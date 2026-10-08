@@ -1172,3 +1172,18 @@ footer strong {
     width: 100%;
   }
 }
+
+/* Menu latéral accessible sur les écrans de faible hauteur */
+@media (min-width: 721px) {
+  .sidebar {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #665632 #050505;
+  }
+  .sidebar::-webkit-scrollbar { width: 7px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #665632; border-radius: 8px; }
+  .sidebar .pro { flex-shrink: 0; padding-top: 22px; }
+}
