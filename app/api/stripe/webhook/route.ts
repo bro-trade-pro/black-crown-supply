@@ -48,10 +48,13 @@ function verifyStripeSignature(
 }
 
 export async function POST(request: NextRequest) {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_TEST_WEBHOOK_SECRET,
+  ].filter((secret): secret is string => Boolean(secret));
 
-  if (!webhookSecret) {
-    console.error("STRIPE_WEBHOOK_SECRET manquant.");
+  if (webhookSecrets.length === 0) {
+    console.error("Aucune clé de signature Stripe configurée.");
 
     return NextResponse.json(
       { error: "Configuration Stripe incomplète." },
@@ -66,10 +69,8 @@ export async function POST(request: NextRequest) {
 
   if (
     !signature ||
-    !verifyStripeSignature(
-      payload,
-      signature,
-      webhookSecret
+    !webhookSecrets.some((secret) =>
+      verifyStripeSignature(payload, signature, secret)
     )
   ) {
     return NextResponse.json(
