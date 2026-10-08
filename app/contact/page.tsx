@@ -1,31 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 
 const gold = "#c8a75b";
-const field: React.CSSProperties = { width: "100%", background: "#151310", color: "#f4efe4", border: "1px solid #51452c", borderRadius: 4, padding: "14px 15px", font: "inherit", boxSizing: "border-box" };
+const field: CSSProperties = { width: "100%", background: "#151310", color: "#f4efe4", border: "1px solid #51452c", borderRadius: 4, padding: "14px 15px", font: "inherit", boxSizing: "border-box" };
 
 export default function ContactPage() {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [sujet, setSujet] = useState("Demande de renseignements");
   const [message, setMessage] = useState("");
-  const [copie, setCopie] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [succes, setSucces] = useState(false);
   const [erreur, setErreur] = useState("");
 
-  function envoyer(e: React.FormEvent<HTMLFormElement>) {
+  async function envoyer(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (envoi) return;
+    setEnvoi(true);
+    setSucces(false);
     setErreur("");
-    if (!nom.trim() || !email.trim() || !message.trim()) {
-      setErreur("Merci de renseigner votre nom, votre email et votre message.");
-      return;
+    try {
+      const website = (e.currentTarget.elements.namedItem("website") as HTMLInputElement)?.value ?? "";
+      const res = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nom, email, sujet, message, website }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Envoi impossible.");
+      setSucces(true);
+      setNom(""); setEmail(""); setMessage("");
+    } catch (err) {
+      setErreur(err instanceof Error ? err.message : "Envoi impossible.");
+    } finally {
+      setEnvoi(false);
     }
-    const destinataire = "flo.blackcrownsup@gmail.com";
-    const objet = `[Black Crown Supply] ${sujet}`;
-    const corps = `Nom / salon : ${nom}\nEmail : ${email}\n\n${message}`;
-    const lien = `mailto:${destinataire}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`;
-    setCopie(true);
-    window.location.href = lien;
   }
 
   return (
@@ -41,10 +47,11 @@ export default function ContactPage() {
             <label style={{ display: "grid", gap: 8 }}>Adresse email *<input value={email} onChange={e => setEmail(e.target.value)} type="email" required maxLength={254} style={field} placeholder="vous@salon.fr" /></label>
             <label style={{ display: "grid", gap: 8 }}>Objet<select value={sujet} onChange={e => setSujet(e.target.value)} style={field}><option>Demande de renseignements</option><option>Produits et disponibilité</option><option>Tarifs professionnels</option><option>Livraison et commande</option><option>Autre demande</option></select></label>
             <label style={{ display: "grid", gap: 8 }}>Message *<textarea value={message} onChange={e => setMessage(e.target.value)} required maxLength={5000} rows={7} style={{ ...field, resize: "vertical" }} placeholder="Comment pouvons-nous vous aider ?" /></label>
+            <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px" }} />
             {erreur && <p role="alert" style={{ color: "#ffb0a8" }}>{erreur}</p>}
-            <button type="submit" style={{ background: gold, color: "#090909", border: 0, padding: "17px 22px", fontWeight: 700, cursor: "pointer", letterSpacing: 1 }}>PRÉPARER MON MESSAGE →</button>
-            {copie && <p role="status" style={{ color: "#e0d2af", lineHeight: 1.7 }}>Votre application email doit s'ouvrir avec le message prérempli. Vérifiez son contenu puis cliquez sur « Envoyer ». Si rien ne s'ouvre, utilisez l'adresse email ci-dessous.</p>}
-            <p style={{ color: "#a9a39a", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Ce formulaire ouvre votre logiciel de messagerie : aucun message n'est envoyé automatiquement depuis le site.</p>
+            {succes && <p role="status" style={{ color: "#b5e4bb" }}>Votre message a bien été envoyé. Nous vous répondrons dès que possible.</p>}
+            <button type="submit" disabled={envoi} style={{ background: gold, color: "#090909", border: 0, padding: "17px 22px", fontWeight: 700, cursor: envoi ? "wait" : "pointer", letterSpacing: 1, opacity: envoi ? 0.7 : 1 }}>{envoi ? "ENVOI EN COURS…" : "ENVOYER MON MESSAGE →"}</button>
+            <p style={{ color: "#a9a39a", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Votre message est transmis directement à notre équipe, sans ouvrir votre messagerie.</p>
           </form>
         </div>
         <div style={{ marginTop: 35, borderTop: "1px solid #40351f", paddingTop: 25 }}>
