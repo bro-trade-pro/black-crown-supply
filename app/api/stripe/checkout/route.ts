@@ -12,9 +12,11 @@ export async function POST(request: NextRequest) {
     if (!secret || !url || !anonKey || !serviceKey) {
       return NextResponse.json({ error: "Paiement non configuré." }, { status: 503 });
     }
-    // Ne jamais démarrer un paiement réel pendant l'intégration initiale.
-    if (!secret.startsWith("sk_test_")) {
-      return NextResponse.json({ error: "Mode test requis." }, { status: 503 });
+    const isTest = secret.startsWith("sk_test_") || secret.startsWith("rk_test_");
+    const isLive = secret.startsWith("sk_live_") || secret.startsWith("rk_live_");
+    if (!isTest && !isLive) return NextResponse.json({ error: "Clé Stripe invalide." }, { status: 503 });
+    if (isLive && process.env.STRIPE_LIVE_ENABLED !== "true") {
+      return NextResponse.json({ error: "Paiements réels en attente de validation." }, { status: 503 });
     }
 
     const authHeader = request.headers.get("authorization") || "";
@@ -53,16 +55,7 @@ export async function POST(request: NextRequest) {
         profileFound: Boolean(profile),
         salonLinked: Boolean(profile?.salon_id),
       });
-      // Diagnostic sans données personnelles ni secrets, réservé au mode test.
-      const diagnostic = profileError?.code
-        ? `Code Supabase : ${profileError.code}`
-        : !profile
-          ? "Profil absent"
-          : "Salon non associé";
-      return NextResponse.json(
-        { error: `Salon introuvable. ${diagnostic}.` },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Salon introuvable." }, { status: 403 });
     }
     const { data: salon, error: salonError } = await adminDb
       .from("salons")
