@@ -60,7 +60,7 @@ export default async function Home() {
 
       <section id="accueil" className="hero">
         <p className="eyebrow">
-          BRO TRADE PRO PRÉSENTE
+          BLACK CROWN SUPPLY · DISTRIBUTION PROFESSIONNELLE
         </p>
 
         <h1>
