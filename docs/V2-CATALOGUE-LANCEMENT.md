@@ -5,7 +5,7 @@ Branche de préparation **v2-catalogue-85**. Ne pas fusionner sans vérification
 ## Règles
 - 85 références dans 10 catégories (13 mèches, 10 crochets, 7 brésiliennes, 4 closures, 6 perruques, 3 postiches, 5 dreadlocks, 12 cosmétiques, 7 bijoux, 18 accessoires).
 - Tous les prix affichés ci-dessous sont **unitaires HT** ; TTC calculé à 20 %, arrondi au centime.
-- Cosmétiques : conserver les 12 fiches, remplacer les images et appliquer les paliers dégressifs 1–11, 12–23 et 24+ unités. Les montants par palier restent à fixer avant écriture en base.
+- Cosmétiques : conserver les 12 fiches, remplacer les images et appliquer les paliers dégressifs 1–11, 12–23 et 24+ unités. Remises validées : 1–11 unités = prix de base ; 12–23 = −5 % ; 24+ = −10 %. Calcul sur prix de base HT, arrondi au centime.
 - Livraison 12 € HT ; offerte à partir de 500 € HT.
 - Anciennes mèches : supprimer les anciennes fiches et variantes (les données de test ne sont pas à conserver), puis recréer les 13 références V2 avec leurs photos. Nettoyer les images devenues orphelines après vérification.\n- Les autres catégories utilisent les références V2 ; les données commerciales historiques sont des tests.\n- Photos à stocker dans Supabase Storage.
 - Nom corrigé : **Outre Carte Verte 82″**, sans X-Pression.
