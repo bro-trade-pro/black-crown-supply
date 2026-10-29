@@ -17,6 +17,7 @@ export type CartItem = {
   variantName: string | null;
   imageUrl: string | null;
   priceCents: number;
+  categoryId?: number;
   quantity: number;
 };
 
@@ -45,6 +46,20 @@ type VariantImage = {
 };
 
 const STORAGE_KEY = "black-crown-cart";
+
+// Tarification cosmétique : remise par référence, calculée sur le prix HT.
+function prixDegressifTtc(prixBaseTtc: number, quantite: number) {
+  const taux = quantite >= 24 ? 0.90 : quantite >= 12 ? 0.95 : 1;
+  const baseHt = Math.round(prixBaseTtc / 1.2);
+  const htRemise = Math.round(baseHt * taux);
+  return Math.round(htRemise * 1.2);
+}
+
+export function prixUnitairePanier(item: CartItem) {
+  return item.categoryId === 2
+    ? prixDegressifTtc(item.priceCents, item.quantity)
+    : item.priceCents;
+}
 
 const CartContext =
   createContext<CartContextType | null>(null);
@@ -338,7 +353,7 @@ export function CartProvider({
 
   const totalCents = items.reduce(
     (sum, item) =>
-      sum + item.priceCents * item.quantity,
+      sum + prixUnitairePanier(item) * item.quantity,
     0
   );
 
