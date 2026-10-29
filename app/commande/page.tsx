@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useCart } from "../CartContext";
+import { useCart, prixUnitairePanier } from "../CartContext";
 import { supabase } from "@/lib/supabase";
 
 const gold = "#c8a75b";
@@ -534,8 +534,7 @@ export default function CommandePage() {
 
                         <strong>
                           {euros(
-                            item.priceCents *
-                              item.quantity
+                            prixUnitairePanier(item) * item.quantity
                           )}
                         </strong>
                       </div>
