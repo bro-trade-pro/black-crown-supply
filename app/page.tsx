@@ -43,13 +43,7 @@ function imageUrl(path: string | null) {
 export default async function Home() {
   const products = await getProducts();
 
-  const meches = products.filter(
-    (product) => product.category_id === 1
-  );
-
-  const cosmetiques = products.filter(
-    (product) => product.category_id === 2
-  );
+  const categories = [{"title":"Mèches","id":"meches","categoryId":1},{"title":"Crochets","id":"crochets","categoryId":3},{"title":"Brésiliennes","id":"bresiliennes","categoryId":4},{"title":"Closures","id":"closures","categoryId":5},{"title":"Perruques","id":"perruques","categoryId":6},{"title":"Postiches","id":"postiches","categoryId":7},{"title":"Dreadlocks","id":"dreadlocks","categoryId":8},{"title":"Cosmétiques","id":"cosmetiques","categoryId":2},{"title":"Bijoux","id":"bijoux","categoryId":9},{"title":"Accessoires","id":"accessoires","categoryId":10}];
 
   return (
     <main className="content">
@@ -80,19 +74,15 @@ export default async function Home() {
         </a>
       </section>
 
-      <Catalog
-        title="Mèches"
-        subtitle="Notre sélection professionnelle"
-        id="meches"
-        products={meches}
-      />
-
-      <Catalog
-        title="Cosmétiques"
-        subtitle="Soins & coiffage"
-        id="cosmetiques"
-        products={cosmetiques}
-      />
+      {categories.map((category) => (
+        <Catalog
+          key={category.id}
+          title={category.title}
+          subtitle="Sélection professionnelle"
+          id={category.id}
+          products={products.filter((product) => product.category_id === category.categoryId)}
+        />
+      ))}
 
       <section id="avantages" className="advantages">
         <div>
