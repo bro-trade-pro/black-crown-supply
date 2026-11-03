@@ -103,7 +103,6 @@ export default function Sidebar() {
 
       <nav>
         <Link href="/#accueil">Accueil</Link>
-        <Link href="/#top-ventes">Top ventes</Link>
         <Link href="/#meches">Mèches - Tresses</Link>
         <Link href="/#crochets">Crochets</Link>
         <Link href="/#bresiliennes">Brésiliennes</Link>
