@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "../CartContext";
+import { useCart, prixUnitairePanier } from "../CartContext";
 
 const gold = "#c8a75b";
 const cream = "#f4efe4";
@@ -230,7 +230,7 @@ export default function CartPage() {
                         }}
                       >
                         Prix unitaire :{" "}
-                        {money(item.priceCents)} TTC
+                        {money(prixUnitairePanier(item))} TTC
                       </p>
 
                       <button
@@ -312,7 +312,7 @@ export default function CartPage() {
                         }}
                       >
                         {money(
-                          item.priceCents * item.quantity
+                          prixUnitairePanier(item) * item.quantity
                         )}
                       </strong>
                     </div>

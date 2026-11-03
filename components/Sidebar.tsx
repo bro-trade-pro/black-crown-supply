@@ -103,8 +103,16 @@ export default function Sidebar() {
 
       <nav>
         <Link href="/#accueil">Accueil</Link>
-        <Link href="/#meches">Mèches</Link>
+        <Link href="/#meches">Mèches - Tresses</Link>
+        <Link href="/#crochets">Crochets</Link>
+        <Link href="/#bresiliennes">Brésiliennes</Link>
+        <Link href="/#closures">Closures</Link>
+        <Link href="/#perruques">Perruques</Link>
+        <Link href="/#postiches">Postiches</Link>
+        <Link href="/#dreadlocks">Dreadlocks</Link>
         <Link href="/#cosmetiques">Cosmétiques</Link>
+        <Link href="/#bijoux">Bijoux</Link>
+        <Link href="/#accessoires">Accessoires</Link>
         <Link href="/#avantages">Nos avantages</Link>
         <Link href="/contact" style={pathname === "/contact" ? { color: "#c8a75b" } : undefined}>Contact</Link>
 

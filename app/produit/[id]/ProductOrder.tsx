@@ -60,7 +60,10 @@ export default function ProductOrder({
       )
     : simpleQuantity;
 
-  const totalCents = totalQuantity * priceCents;
+  const baseHt = Math.round(priceCents / 1.2);
+  const remise = categoryId === 2 ? (totalQuantity >= 24 ? 0.90 : totalQuantity >= 12 ? 0.95 : 1) : 1;
+  const prixUnitaireTtc = Math.round(Math.round(baseHt * remise) * 1.2);
+  const totalCents = totalQuantity * prixUnitaireTtc;
 
   function changeQuantity(id: string, change: number) {
     setAdded(false);
@@ -84,6 +87,7 @@ export default function ProductOrder({
           variantName: variant.nom,
           imageUrl: productImageUrl,
           priceCents,
+          categoryId,
           quantity: quantities[variant.id],
         }));
 
@@ -98,6 +102,7 @@ export default function ProductOrder({
           variantName: null,
           imageUrl: productImageUrl,
           priceCents,
+          categoryId,
           quantity: simpleQuantity,
         },
       ]);
@@ -257,6 +262,13 @@ export default function ProductOrder({
             </button>
           </div>
         </>
+      )}
+
+      {categoryId === 2 && (
+        <p style={{color:"#c8a75b",fontSize:13,lineHeight:1.7}}>
+          Prix dégressifs par référence : 1–11 unités au tarif normal · 12–23 unités : −5 % · dès 24 unités : −10 %.
+          {totalQuantity > 0 && <> Prix unitaire TTC appliqué : {money(prixUnitaireTtc)}.</>}
+        </p>
       )}
 
       <div className="orderSummary">
