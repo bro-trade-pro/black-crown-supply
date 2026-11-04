@@ -45,6 +45,8 @@ export default async function Home() {
 
   const categories = [{"title":"Mèches","id":"meches","categoryId":1},{"title":"Crochets","id":"crochets","categoryId":3},{"title":"Brésiliennes","id":"bresiliennes","categoryId":4},{"title":"Closures","id":"closures","categoryId":5},{"title":"Perruques","id":"perruques","categoryId":6},{"title":"Postiches","id":"postiches","categoryId":7},{"title":"Dreadlocks","id":"dreadlocks","categoryId":8},{"title":"Cosmétiques","id":"cosmetiques","categoryId":2},{"title":"Bijoux","id":"bijoux","categoryId":9},{"title":"Accessoires","id":"accessoires","categoryId":10}];
 
+  const featured = [1, 3, 4, 6].map((id) => products.find((product) => product.category_id === id)).filter((product): product is Product => Boolean(product));
+
   return (
     <main className="content">
       <header>
@@ -52,27 +54,49 @@ export default async function Home() {
         <div>Catalogue professionnel · Prix TTC</div>
       </header>
 
-      <section id="accueil" className="hero">
-        <p className="eyebrow">
-          BLACK CROWN SUPPLY · DISTRIBUTION PROFESSIONNELLE
-        </p>
-
-        <h1>
-          Le catalogue pro
-          <br />
-          <em>qui va à l’essentiel.</em>
-        </h1>
-
-        <p>
-          Produits capillaires sélectionnés pour les
-          salons professionnels. Commande simple,
-          livraison directe, relation terrain.
-        </p>
-
-        <a href="#meches" className="cta">
-          Découvrir le catalogue
-        </a>
+      <section id="accueil" className="hero heroV2">
+        <div className="heroV2Content">
+          <p className="eyebrow">BLACK CROWN SUPPLY · DISTRIBUTION B2B</p>
+          <h1>La coiffure afro mérite <em>une distribution à sa hauteur.</em></h1>
+          <p>Vos essentiels professionnels, au même endroit. Mèches, crochets, perruques, soins et accessoires : une sélection pensée pour les salons.</p>
+          <div className="heroV2Actions">
+            <a href="#categories" className="cta">Explorer les 10 univers</a>
+            <Link href="/panier" className="cta ctaSecondary">Mon panier</Link>
+          </div>
+          <div className="heroV2Stats">
+            <span><strong>{products.length}</strong> références</span>
+            <span><strong>{categories.length}</strong> univers</span>
+            <span><strong>100 %</strong> professionnel</span>
+          </div>
+        </div>
+        <div className="heroV2Crown" aria-hidden="true">♛</div>
       </section>
+
+      <section className="categoryDirectory" id="categories" aria-labelledby="categoryDirectoryTitle">
+        <div className="sectionHead">
+          <div><p>LE CATALOGUE BLACK CROWN</p><h2 id="categoryDirectoryTitle">Trouvez votre univers</h2></div>
+          <span>10 catégories</span>
+        </div>
+        <div className="categoryDirectoryGrid">
+          {categories.map((category, index) => (
+            <a key={category.id} href={`#${category.id}`} className="categoryDirectoryLink">
+              <span className="categoryDirectoryNumber">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{category.title}</strong>
+              <span className="categoryDirectoryArrow" aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {featured.length > 0 && (
+        <section className="catalog featuredCatalog" id="selection">
+          <div className="sectionHead">
+            <div><p>À DÉCOUVRIR</p><h2>La sélection Black Crown</h2></div>
+            <span>Une sélection de notre catalogue</span>
+          </div>
+          <ProductGrid products={featured} />
+        </section>
+      )}
 
       {categories.map((category) => (
         <Catalog
@@ -144,6 +168,13 @@ function Catalog({
         <span>{products.length} références</span>
       </div>
 
+      <ProductGrid products={products} />
+    </section>
+  );
+}
+
+function ProductGrid({ products }: { products: Product[] }) {
+  return (
       <div className="grid">
         {products.map((product) => {
           const img = imageUrl(product.image_url);
@@ -194,6 +225,5 @@ function Catalog({
           );
         })}
       </div>
-    </section>
   );
 }
