@@ -1,19 +1,11 @@
 
 import Link from "next/link";
+import ProductGrid from "@/components/CatalogProductGrid";
+import { categories } from "@/lib/catalogCategories";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-type Product = {
-  id: string;
-  nom: string;
-  marque: string | null;
-  contenance: string | null;
-  prix_ttc_cents: number;
-  image_url: string | null;
-  category_id: number;
-};
 
 async function getProducts() {
   const { data, error } = await supabase
@@ -32,18 +24,9 @@ async function getProducts() {
   return (data ?? []) as Product[];
 }
 
-function imageUrl(path: string | null) {
-  if (!path) return null;
-
-  return supabase.storage
-    .from("product-images")
-    .getPublicUrl(path).data.publicUrl;
-}
-
 export default async function Home() {
   const products = await getProducts();
 
-  const categories = [{"title":"Mèches","id":"meches","categoryId":1},{"title":"Crochets","id":"crochets","categoryId":3},{"title":"Brésiliennes","id":"bresiliennes","categoryId":4},{"title":"Closures","id":"closures","categoryId":5},{"title":"Perruques","id":"perruques","categoryId":6},{"title":"Postiches","id":"postiches","categoryId":7},{"title":"Dreadlocks","id":"dreadlocks","categoryId":8},{"title":"Cosmétiques","id":"cosmetiques","categoryId":2},{"title":"Bijoux","id":"bijoux","categoryId":9},{"title":"Accessoires","id":"accessoires","categoryId":10}];
 
   const featured = [1, 3, 4, 6].map((id) => products.find((product) => product.category_id === id)).filter((product): product is Product => Boolean(product));
 
@@ -79,7 +62,7 @@ export default async function Home() {
         </div>
         <div className="categoryDirectoryGrid">
           {categories.map((category, index) => (
-            <a key={category.id} href={`#${category.id}`} className="categoryDirectoryLink">
+            <a key={category.id} href={`/categorie/${category.id}`} className="categoryDirectoryLink">
               <span className="categoryDirectoryNumber">{String(index + 1).padStart(2, "0")}</span>
               <strong>{category.title}</strong>
               <span className="categoryDirectoryArrow" aria-hidden="true">↗</span>
@@ -97,16 +80,6 @@ export default async function Home() {
           <ProductGrid products={featured} />
         </section>
       )}
-
-      {categories.map((category) => (
-        <Catalog
-          key={category.id}
-          title={category.title}
-          subtitle="Sélection professionnelle"
-          id={category.id}
-          products={products.filter((product) => product.category_id === category.categoryId)}
-        />
-      ))}
 
       <section id="avantages" className="advantages">
         <div>
@@ -146,84 +119,3 @@ export default async function Home() {
   );
 }
 
-function Catalog({
-  title,
-  subtitle,
-  id,
-  products,
-}: {
-  title: string;
-  subtitle: string;
-  id: string;
-  products: Product[];
-}) {
-  return (
-    <section className="catalog" id={id}>
-      <div className="sectionHead">
-        <div>
-          <p>{subtitle}</p>
-          <h2>{title}</h2>
-        </div>
-
-        <span>{products.length} références</span>
-      </div>
-
-      <ProductGrid products={products} />
-    </section>
-  );
-}
-
-function ProductGrid({ products }: { products: Product[] }) {
-  return (
-      <div className="grid">
-        {products.map((product) => {
-          const img = imageUrl(product.image_url);
-
-          return (
-            <article
-              className="card"
-              key={product.id}
-            >
-              {img ? (
-                <img
-                  src={img}
-                  alt={product.nom}
-                />
-              ) : (
-                <div className="placeholder">
-                  BLACK CROWN
-                </div>
-              )}
-
-              <div className="cardBody">
-                {product.marque && (
-                  <small>{product.marque}</small>
-                )}
-
-                <h3>{product.nom}</h3>
-
-                {product.contenance && (
-                  <p>{product.contenance}</p>
-                )}
-
-                <div className="price">
-                  {(product.prix_ttc_cents / 100)
-                    .toFixed(2)
-                    .replace(".", ",")}{" "}
-                  €
-                  <span>TTC</span>
-                </div>
-
-                <Link
-                  className="productButton"
-                  href={`/produit/${product.id}`}
-                >
-                  Voir le produit
-                </Link>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-  );
-}
