@@ -1211,3 +1211,17 @@ footer strong {
 .catalog {scroll-margin-top:24px;}
 @media(max-width:1250px){.categoryDirectoryGrid{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:720px){.heroV2{min-height:auto;padding:70px 7vw 45px;}.heroV2Crown{right:-25%;font-size:300px;opacity:.5;}.heroV2Stats{margin-top:40px;gap:18px;}.categoryDirectory{padding:55px 6vw 20px;}.categoryDirectoryGrid{grid-template-columns:repeat(2,minmax(0,1fr));}.categoryDirectoryLink{min-height:125px;padding:16px;}.featuredCatalog{padding-top:35px;}}
+
+/* Pages de catégories */
+.categoryPageIntro{padding:65px 5vw 45px;background:radial-gradient(ellipse at 90% 20%,rgba(200,167,91,.14),transparent 45%),#10100e;border-bottom:1px solid #29251d;}
+.categoryBack{display:inline-block;margin-bottom:35px;color:var(--gold);text-decoration:none;font-size:13px;}
+.categoryPageIntro h1{font-size:clamp(44px,6vw,80px);margin:12px 0 20px;}
+.categoryPageIntro>p:not(.eyebrow){color:#aaa;line-height:1.6;}
+.categoryCount{display:inline-block;margin-top:16px;color:var(--gold);font-size:13px;letter-spacing:1px;}
+.categoryPageCatalog{padding-top:48px;}
+.categoryPageOther{padding:30px 5vw 80px;}
+.categoryPageOther h2{font:400 30px Georgia,serif;margin-bottom:25px;}
+.categoryPageLinks{display:flex;flex-wrap:wrap;gap:10px;}
+.categoryPageLinks a{border:1px solid #3c3325;padding:12px 16px;color:var(--gold);text-decoration:none;font-size:13px;}
+.categoryPageLinks a:hover{border-color:var(--gold);}
+@media(max-width:720px){.categoryPageIntro{padding:42px 6vw;}.categoryPageCatalog{padding-top:30px;}}
