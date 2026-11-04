@@ -180,6 +180,9 @@ export default function ProductOrder({
                     }`}
                   >
                     <div className="variantIdentity">
+                      {variant.image_url && (
+                        <img src={variant.image_url} alt={`Nuance ${variant.nom}`} loading="lazy" style={{width:48,height:72,objectFit:"cover",border:"1px solid #665632",borderRadius:4,marginRight:12}} />
+                      )}
                       <div>
                         <strong>{variant.nom}</strong>
 
