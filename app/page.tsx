@@ -55,6 +55,14 @@ export default async function Home() {
         <div className="heroV2Crown" aria-hidden="true">♛</div>
       </section>
 
+      <section aria-labelledby="parrainage-title" style={{ margin: "30px auto 55px", maxWidth: 1180, padding: "35px 30px", border: "1px solid #c8a75b", background: "#17130d", textAlign: "center" }}>
+        <p className="eyebrow">PROGRAMME PARRAINAGE</p>
+        <h2 id="parrainage-title" style={{ fontFamily: "Georgia,serif", fontSize: "clamp(28px,4vw,42px)", fontWeight: 400, color: "#f4efe4" }}>Recommandez Black Crown, profitez ensemble.</h2>
+        <p style={{ color: "#e0c78d", fontSize: 20, lineHeight: 1.6 }}><strong>−10 %</strong> sur la première commande de votre filleul · <strong>−20 %</strong> sur votre prochaine commande</p>
+        <p style={{ color: "#aaa", fontSize: 13, lineHeight: 1.7 }}>La récompense du parrain est débloquée après la première commande effectivement payée du filleul. Offre soumise aux conditions du programme.</p>
+        <Link href="/inscription" className="cta" style={{ display: "inline-block", marginTop: 15 }}>Créer mon compte pro</Link>
+      </section>
+
       <section className="categoryDirectory" id="categories" aria-labelledby="categoryDirectoryTitle">
         <div className="sectionHead">
           <div><p>LE CATALOGUE BLACK CROWN</p><h2 id="categoryDirectoryTitle">Trouvez votre univers</h2></div>
