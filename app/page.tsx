@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import ProductGrid from "@/components/CatalogProductGrid";
+import ProductGrid, { type Product } from "@/components/CatalogProductGrid";
 import { categories } from "@/lib/catalogCategories";
 import { supabase } from "@/lib/supabase";
 
