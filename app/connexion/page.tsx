@@ -213,6 +213,8 @@ export default function ConnexionPage() {
               : "ME CONNECTER"}
           </button>
 
+          <p style={{ textAlign: "right", marginTop: 14, fontSize: 13 }}><Link href="/mot-de-passe-oublie" style={{ color: "#c8a75b" }}>Mot de passe oublié ?</Link></p>
+
           <p
             style={{
               textAlign: "center",
