@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ProductOrder from "./ProductOrder";
+import { categoryById } from "@/lib/catalogCategories";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -83,53 +84,12 @@ export default async function ProductPage({
   const variants = await getVariants(product.id);
   const img = imageUrl(product.image_url);
 
-  const categoryLabel =
-    product.category_id === 1
-      ? "Mèches"
-      : "Cosmétiques";
-
-  const categoryLink =
-    product.category_id === 1
-      ? "/#meches"
-      : "/#cosmetiques";
+  const category = categoryById(product.category_id);
+  const categoryLabel = category?.title ?? "Catalogue";
+  const categoryLink = category ? `/categorie/${category.id}` : "/#categories";
 
   return (
     <main className="productPage">
-      {/* MENU LATÉRAL */}
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="crown">♛</div>
-          <strong>BLACK CROWN</strong>
-          <span>SUPPLY</span>
-          <small>WHOLESALE PRO</small>
-        </div>
-
-        <nav>
-          <Link href="/#accueil">Accueil</Link>
-          <Link href="/#meches">Mèches</Link>
-          <Link href="/#cosmetiques">
-            Cosmétiques
-          </Link>
-          <Link href="/#avantages">
-            Nos avantages
-          </Link>
-          <Link href="/#contact">Contact</Link>
-
-          <Link
-            href="/panier"
-            style={{ color: "#c8a75b" }}
-          >
-            Mon panier →
-          </Link>
-        </nav>
-
-        <div className="pro">
-          ESPACE PRO
-          <br />
-          <button>Connexion salon</button>
-        </div>
-      </aside>
-
       {/* CONTENU */}
       <section className="content productContent">
         <header>
