@@ -72,6 +72,7 @@ export default function CommandePage() {
   const [paiementEnCours, setPaiementEnCours] = useState(false);
   const [erreurPaiement, setErreurPaiement] = useState("");
   const [erreur, setErreur] = useState("");
+  const [parrainagePct, setParrainagePct] = useState(0);
   const [commande, setCommande] =
     useState<CommandeCreee | null>(null);
 
@@ -86,8 +87,9 @@ export default function CommandePage() {
   const livraisonCents = francoAtteint
     ? 0
     : LIVRAISON_TTC;
+  const remiseParrainageCents = Math.round(totalCents * parrainagePct / 100);
   const totalAvecLivraison =
-    totalCents + livraisonCents;
+    totalCents - remiseParrainageCents + livraisonCents;
   const acompteCents =
     Math.ceil(totalAvecLivraison / 2);
   const soldeCents =
@@ -138,6 +140,21 @@ export default function CommandePage() {
 
     chargerSalon();
   }, []);
+
+  useEffect(() => {
+    if (!salon) return;
+    let active = true;
+    supabase.rpc("apercu_parrainage").then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        console.warn("Aperçu parrainage indisponible :", error.message);
+        return;
+      }
+      const pct = Number(data?.pourcentage ?? 0);
+      setParrainagePct(pct === 10 || pct === 20 ? pct : 0);
+    });
+    return () => { active = false; };
+  }, [salon]);
 
   async function confirmerCommande() {
     if (envoi || commande || !ready || !salon) return;
@@ -755,6 +772,12 @@ export default function CommandePage() {
                     </p>
 
                     <h2>Votre commande</h2>
+
+                    {parrainagePct > 0 && (
+                      <p style={{ color: gold }}>
+                        Parrainage ({parrainagePct} %) : −{euros(remiseParrainageCents)}
+                      </p>
+                    )}
 
                     <p>
                       Total TTC :{" "}
