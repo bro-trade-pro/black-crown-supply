@@ -156,7 +156,7 @@ export default async function ProductPage({
               productId={product.id}
               productName={product.nom}
               productImageUrl={img}
-              variants={variants}
+              variants={variants.map((variant) => ({ ...variant, image_url: imageUrl(variant.image_url) }))}
               priceCents={
                 product.prix_ttc_cents
               }
