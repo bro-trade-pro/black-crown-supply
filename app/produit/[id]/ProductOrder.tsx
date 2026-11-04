@@ -74,6 +74,20 @@ export default function ProductOrder({
     }));
   }
 
+  function parseQuantity(value: string) {
+    if (value.trim() === "") return 0;
+    if (!/^\d+$/.test(value)) return null;
+    const quantity = Number(value);
+    return Number.isSafeInteger(quantity) ? quantity : null;
+  }
+
+  function setVariantQuantity(id: string, value: string) {
+    const quantity = parseQuantity(value);
+    if (quantity === null) return;
+    setAdded(false);
+    setQuantities((current) => ({ ...current, [id]: quantity }));
+  }
+
   function addToCart() {
     if (totalQuantity === 0) return;
 
@@ -208,7 +222,7 @@ export default function ProductOrder({
                         −
                       </button>
 
-                      <span>{quantity}</span>
+                      <input type="text" inputMode="numeric" pattern="[0-9]*" value={quantity} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setVariantQuantity(variant.id, event.target.value)} aria-label={`Quantité pour ${variant.nom}`} style={{width:58,minWidth:0,textAlign:"center",background:"transparent",color:"#f4efe4",border:0,font:"inherit",padding:"8px 2px"}} />
 
                       <button
                         type="button"
@@ -251,7 +265,7 @@ export default function ProductOrder({
               −
             </button>
 
-            <span>{simpleQuantity}</span>
+            <input type="text" inputMode="numeric" pattern="[0-9]*" value={simpleQuantity} onFocus={(event) => event.currentTarget.select()} onChange={(event) => { const quantity = parseQuantity(event.target.value); if (quantity !== null) { setAdded(false); setSimpleQuantity(quantity); } }} aria-label="Quantité" style={{width:68,minWidth:0,textAlign:"center",background:"transparent",color:"#f4efe4",border:0,font:"inherit",padding:"8px 2px"}} />
 
             <button
               type="button"
