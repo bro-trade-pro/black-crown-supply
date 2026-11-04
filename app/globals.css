@@ -1187,3 +1187,27 @@ footer strong {
   .sidebar::-webkit-scrollbar-thumb { background: #665632; border-radius: 8px; }
   .sidebar .pro { flex-shrink: 0; padding-top: 22px; }
 }
+
+
+/* ACCUEIL BLACK CROWN — V2 */
+.heroV2 {position:relative;display:flex;align-items:center;overflow:hidden;min-height:610px;background:radial-gradient(ellipse at 78% 45%,rgba(200,167,91,.19),transparent 34%),linear-gradient(115deg,#080808 8%,#17130d 100%);}
+.heroV2Content {position:relative;z-index:1;max-width:780px;}
+.heroV2 h1 {max-width:770px;font-size:clamp(43px,5.3vw,77px);line-height:1.06;}
+.heroV2Crown {position:absolute;right:2%;top:50%;transform:translateY(-52%);font-size:clamp(230px,29vw,520px);line-height:1;color:rgba(200,167,91,.10);pointer-events:none;}
+.heroV2Actions {display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+.heroV2Actions .cta {margin-top:24px;}
+.heroV2Actions .ctaSecondary {border-color:#514631;color:#f4efe4;}
+.heroV2Stats {display:flex;flex-wrap:wrap;gap:28px;margin-top:60px;padding-top:25px;border-top:1px solid rgba(200,167,91,.23);}
+.heroV2Stats span {display:flex;align-items:baseline;gap:8px;color:#a7a198;font-size:12px;}
+.heroV2Stats strong {color:var(--gold);font:400 25px Georgia,serif;}
+.categoryDirectory {padding:76px 5vw 30px;scroll-margin-top:24px;}
+.categoryDirectoryGrid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;}
+.categoryDirectoryLink {display:flex;flex-direction:column;justify-content:space-between;min-height:142px;padding:20px;border:1px solid #332c20;background:linear-gradient(145deg,#17140f,#0e0e0e);color:var(--cream);text-decoration:none;transition:border-color .2s,transform .2s;}
+.categoryDirectoryLink:hover {border-color:var(--gold);transform:translateY(-3px);}
+.categoryDirectoryNumber {font-size:11px;color:var(--gold);letter-spacing:2px;}
+.categoryDirectoryLink strong {font:400 clamp(16px,1.6vw,23px) Georgia,serif;overflow-wrap:anywhere;}
+.categoryDirectoryArrow {align-self:flex-end;color:var(--gold);}
+.featuredCatalog {padding-top:55px;padding-bottom:30px;}
+.catalog {scroll-margin-top:24px;}
+@media(max-width:1250px){.categoryDirectoryGrid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:720px){.heroV2{min-height:auto;padding:70px 7vw 45px;}.heroV2Crown{right:-25%;font-size:300px;opacity:.5;}.heroV2Stats{margin-top:40px;gap:18px;}.categoryDirectory{padding:55px 6vw 20px;}.categoryDirectoryGrid{grid-template-columns:repeat(2,minmax(0,1fr));}.categoryDirectoryLink{min-height:125px;padding:16px;}.featuredCatalog{padding-top:35px;}}
