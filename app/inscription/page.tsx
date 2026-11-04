@@ -12,6 +12,7 @@ type FormData = {
   email: string;
   nom_salon: string;
   siret: string;
+  parrain_email: string;
   adresse: string;
   code_postal: string;
   ville: string;
@@ -26,6 +27,7 @@ const initialForm: FormData = {
   email: "",
   nom_salon: "",
   siret: "",
+  parrain_email: "",
   adresse: "",
   code_postal: "",
   ville: "",
@@ -75,6 +77,7 @@ export default function InscriptionPage() {
             telephone: form.telephone.trim(),
             nom_salon: form.nom_salon.trim(),
             siret: form.siret.trim(),
+            parrain_email: form.parrain_email.trim().toLowerCase(),
             adresse: form.adresse.trim(),
             code_postal: form.code_postal.trim(),
             ville: form.ville.trim(),
@@ -330,6 +333,12 @@ export default function InscriptionPage() {
               {field("Ville", "ville", {
                 autoComplete: "address-level2",
               })}
+            </div>
+
+            <div style={{ marginTop: 30, padding: 24, border: "1px solid #c8a75b", background: "#17130d" }}>
+              <h2 style={{ fontFamily: "Georgia,serif", fontWeight: 400, marginTop: 0 }}>Parrainage</h2>
+              <p style={{ color: "#aaa", fontSize: 13, lineHeight: 1.7 }}>Un salon vous a recommandé Black Crown Supply ? Indiquez son email professionnel pour bénéficier de 10 % sur votre première commande. Votre parrain recevra 20 % sur sa prochaine commande après votre premier achat payé.</p>
+              {field("Parrainé par — email professionnel du parrain", "parrain_email", { type: "email", required: false, placeholder: "email@salon.fr" })}
             </div>
 
             <div
