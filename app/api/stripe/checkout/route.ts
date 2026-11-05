@@ -109,10 +109,39 @@ export async function POST(request: NextRequest) {
       cache: "no-store",
     });
     const session = await stripeResponse.json();
-    if (!stripeResponse.ok || typeof session.url !== "string" || !session.url.startsWith("https://checkout.stripe.com/")) {
+    if (!stripeResponse.ok || typeof session.id !== "string" || !/^cs_(test_|live_)[A-Za-z0-9]+$/.test(session.id) || typeof session.url !== "string" || !session.url.startsWith("https://checkout.stripe.com/")) {
       console.error("Stripe Checkout creation failed", stripeResponse.status, session?.error?.type);
       return NextResponse.json({ error: "Impossible de préparer le paiement Stripe." }, { status: 502 });
     }
+    // Conserver la session Stripe avant de transmettre son URL au client.
+    // Une commande ne doit jamais partir en paiement sans session traçable.
+    const { data: linkedOrder, error: linkError } = await adminDb
+      .from("orders")
+      .update({ stripe_checkout_session_id: session.id })
+      .eq("id", order.id)
+      .eq("salon_id", profile.salon_id)
+      .eq("statut", "en_attente_acompte")
+      .eq("acompte_paye_cents", 0)
+      .is("stripe_checkout_session_id", null)
+      .select("id")
+      .maybeSingle();
+
+    if (linkError || !linkedOrder) {
+      console.error("Stripe Checkout: impossible de lier la session", linkError?.code);
+      // Fermer la session créée afin d'éviter un paiement non traçable.
+      const expireResponse = await fetch(
+        `https://api.stripe.com/v1/checkout/sessions/${session.id}/expire`,
+        { method: "POST", headers: { Authorization: `Bearer ${secret}` }, cache: "no-store" }
+      ).catch(() => null);
+      if (!expireResponse?.ok) {
+        console.error("Stripe Checkout: expiration de la session non confirmée", session.id);
+      }
+      return NextResponse.json(
+        { error: "Session de paiement indisponible. Réessayez plus tard." },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout route error", error);
